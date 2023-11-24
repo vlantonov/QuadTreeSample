@@ -205,6 +205,11 @@ class Node {
 
     // No more points to search
     if (mPoint) {
+      // Check if point found is close enough
+      if (std::abs(mPoint->x - aPoint.x) > kMinDistanceX || std::abs(mPoint->y - aPoint.y) > kMinDistanceY) {
+          std::cout << "Not close enough " << std::abs(mPoint->x - aPoint.x) << " " << std::abs(mPoint->y - aPoint.y) << "\n";
+          return std::nullopt;
+      }
       std::cout << "Found\n";
       return mPoint;
     }
