@@ -265,6 +265,105 @@ class Node {
     return std::nullopt;
   }
 
+  std::vector<Point> findPointsInArea(const Rectangle& aArea) {
+    const auto overlap = calculateOverlap(mBorder, aArea);
+
+    std::vector<Point> result;
+    switch (overlap) {
+      case Overlap::NO:
+        std::cout << "No overlap between " << mBorder << " and " << aArea
+                  << '\n';
+        return {};
+      case Overlap::YES:
+        std::cout << "Full overlap between " << mBorder << " and " << aArea
+                  << '\n';
+        // Leaf node
+        if (mPoint) {
+          std::cout << "Point found in area\n";
+          return {*mPoint};
+        }
+
+        // TODO: Replace recursion with iteration
+        if (mTopRight) {
+          std::cout << "Search area TopRight\n";
+          const auto pointsFoundInArea = mTopRight->findPointsInArea(aArea);
+          result.insert(std::end(result), std::cbegin(pointsFoundInArea),
+                        std::cend(pointsFoundInArea));
+        }
+
+        if (mTopLeft) {
+          std::cout << "Search area TopLeft\n";
+          const auto pointsFoundInArea = mTopLeft->findPointsInArea(aArea);
+          result.insert(std::end(result), std::cbegin(pointsFoundInArea),
+                        std::cend(pointsFoundInArea));
+        }
+
+        if (mBottomRight) {
+          std::cout << "Search area BottomRight\n";
+          const auto pointsFoundInArea = mBottomRight->findPointsInArea(aArea);
+          result.insert(std::end(result), std::cbegin(pointsFoundInArea),
+                        std::cend(pointsFoundInArea));
+        }
+
+        if (mBottomLeft) {
+          std::cout << "Search area BottomLeft\n";
+          const auto pointsFoundInArea = mBottomLeft->findPointsInArea(aArea);
+          result.insert(std::end(result), std::cbegin(pointsFoundInArea),
+                        std::cend(pointsFoundInArea));
+        }
+        return result;
+
+      case Overlap::PARTIAL:
+        // TODO: Replace recursion with iteration
+        std::cout << "Partial overlap between " << mBorder << " and " << aArea
+                  << '\n';
+        if (mTopRight) {
+          std::cout << "Search area TopRight\n";
+          const auto pointsFoundInArea = mTopRight->findPointsInArea(aArea);
+          std::copy_if(std::cbegin(pointsFoundInArea),
+                       std::cend(pointsFoundInArea), std::back_inserter(result),
+                       [&aArea](const auto& aPoint) {
+                         return aArea.isPointInside(aPoint);
+                       });
+        }
+
+        if (mTopLeft) {
+          std::cout << "Search area TopLeft\n";
+          const auto pointsFoundInArea = mTopLeft->findPointsInArea(aArea);
+          std::copy_if(std::cbegin(pointsFoundInArea),
+                       std::cend(pointsFoundInArea), std::back_inserter(result),
+                       [&aArea](const auto& aPoint) {
+                         return aArea.isPointInside(aPoint);
+                       });
+        }
+
+        if (mBottomRight) {
+          std::cout << "Search area BottomRight\n";
+          const auto pointsFoundInArea = mBottomRight->findPointsInArea(aArea);
+          std::copy_if(std::cbegin(pointsFoundInArea),
+                       std::cend(pointsFoundInArea), std::back_inserter(result),
+                       [&aArea](const auto& aPoint) {
+                         return aArea.isPointInside(aPoint);
+                       });
+        }
+
+        if (mBottomLeft) {
+          std::cout << "Search area BottomLeft\n";
+          const auto pointsFoundInArea = mBottomLeft->findPointsInArea(aArea);
+          std::copy_if(std::cbegin(pointsFoundInArea),
+                       std::cend(pointsFoundInArea), std::back_inserter(result),
+                       [&aArea](const auto& aPoint) {
+                         return aArea.isPointInside(aPoint);
+                       });
+        }
+        return result;
+    }
+
+    std::cout << "Unhandled overlap value: " << static_cast<int>(overlap)
+              << "\n";
+    return {};
+  }
+
  private:
   Node(const Rectangle& aBorder) : mBorder{aBorder} {
     std::cout << "Node border " << mBorder << '\n';
@@ -319,7 +418,7 @@ int main(int arcg, char* argv[]) {
   // Find points in Quad Tree
   for (const auto& point : testPoints) {
     std::cout << "=====\n";
-    auto pointFound = root->findPoint(point);
+    const auto pointFound = root->findPoint(point);
     std::cout << "Find point: " << pointFound.has_value() << '\n';
     if (pointFound) {
       std::cout << "Found point coordinates: {" << pointFound->x << ","
@@ -329,11 +428,21 @@ int main(int arcg, char* argv[]) {
   }
 
   // Missing point?
-  auto pointFound = root->findPoint(Point{0.1, 0.1});
+  const auto pointFound = root->findPoint(Point{0.1, 0.1});
   std::cout << "Find point: " << pointFound.has_value() << '\n';
   if (pointFound) {
     std::cout << "Found point coordinates: {" << pointFound->x << ","
               << pointFound->y << "}\n";
+  }
+
+  // Search points in area
+  const Rectangle searchArea{-1.0, 0.0, -1.0, 0.0};
+
+  const auto pointsFoundInArea = root->findPointsInArea(searchArea);
+  std::cout << "Points found in area " << searchArea << " : "
+            << pointsFoundInArea.size() << '\n';
+  for (const auto& point : pointsFoundInArea) {
+    std::cout << "Point in area: {" << point.x << "," << point.y << "}\n";
   }
 
   std::cout << "Done.\n";
