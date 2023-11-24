@@ -42,6 +42,7 @@ struct Rectangle {
       std::cout << "Out of borders" << '\n';
       return false;
     }
+    return true;
   }
 
   operator bool() const {
@@ -57,6 +58,24 @@ struct Rectangle {
 
   float Ymax() const { return mYmax; }
 
+  float Xcenter() const { return mCenterX; }
+
+  float Ycenter() const { return mCenterY; }
+
+  Rectangle createTopRight() const {
+    return {mCenterX, mXmax, mCenterY, mYmax};
+  }
+
+  Rectangle createBottomRight() const {
+    return {mCenterX, mXmax, mYmin, mCenterY};
+  }
+
+  Rectangle createTopLeft() const { return {mXmin, mCenterX, mCenterY, mYmax}; }
+
+  Rectangle createBottomLeft() const {
+    return {mXmin, mCenterX, mYmin, mCenterY};
+  }
+
  private:
   // Borders
   float mXmax;
@@ -68,6 +87,12 @@ struct Rectangle {
   float mCenterX;
   float mCenterY;
 };
+
+std::ostream& operator<<(std::ostream& os, const Rectangle& data) {
+  os << "{" << data.Xmin() << "," << data.Xmax() << "}{" << data.Ymin() << ","
+     << data.Ymax() << "}";
+  return os;
+}
 
 enum class Overlap { YES, NO, PARTIAL };
 
@@ -99,16 +124,13 @@ Overlap calculateOverlap(const Rectangle& lhs, const Rectangle& rhs) {
 
 class Node {
  public:
-  static std::shared_ptr<Node> createNode(float aBorderXmin, float aBorderXmax,
-                                          float aBorderYmin,
-                                          float aBorderYmax) {
-    if (std::abs(aBorderXmax - aBorderXmin) < kMinDistanceX ||
-        std::abs(aBorderYmax - aBorderYmin) < kMinDistanceY) {
+  static std::shared_ptr<Node> createNode(const Rectangle& aBorder) {
+    if (std::abs(aBorder.Xmax() - aBorder.Xmin()) < kMinDistanceX ||
+        std::abs(aBorder.Ymax() - aBorder.Ymin()) < kMinDistanceY) {
       return nullptr;
     }
 
-    std::shared_ptr<Node> result(
-        new Node(aBorderXmin, aBorderXmax, aBorderYmin, aBorderYmax));
+    std::shared_ptr<Node> result(new Node(aBorder));
 
     return result;
   }
@@ -116,9 +138,7 @@ class Node {
   bool insertPoint(const Point& aPoint) {
     std::cout << "{" << aPoint.x << "," << aPoint.y << "}" << '\n';
     // Point out of borders
-    // TODO: Rectangle method
-    if (aPoint.x > mBorderXmax || aPoint.x < mBorderXmin ||
-        aPoint.y > mBorderYmax || aPoint.y < mBorderYmin) {
+    if (!mBorder.isPointInside(aPoint)) {
       std::cout << "Out of borders" << '\n';
       return false;
     }
@@ -131,13 +151,13 @@ class Node {
     }
 
     bool isInserted = false;
-    if (aPoint.x > mCenterX) {
-      if (aPoint.y > mCenterY) {
+    if (aPoint.x > mBorder.Xcenter()) {
+      if (aPoint.y > mBorder.Ycenter()) {
         std::cout << "TopRight" << '\n';
         if (mTopRight) {
           isInserted = mTopRight->insertPoint(aPoint);
         } else {
-          mTopRight = createNode(mCenterX, mBorderXmax, mCenterY, mBorderYmax);
+          mTopRight = createNode(mBorder.createTopRight());
           if (mTopRight) {
             isInserted = mTopRight->insertPoint(aPoint);
           }
@@ -147,8 +167,7 @@ class Node {
         if (mBottomRight) {
           isInserted = mBottomRight->insertPoint(aPoint);
         } else {
-          mBottomRight =
-              createNode(mCenterX, mBorderXmax, mBorderYmin, mCenterY);
+          mBottomRight = createNode(mBorder.createBottomRight());
           if (mBottomRight) {
             isInserted = mBottomRight->insertPoint(aPoint);
           }
@@ -156,12 +175,12 @@ class Node {
       }
 
     } else {
-      if (aPoint.y > mCenterY) {
+      if (aPoint.y > mBorder.Ycenter()) {
         std::cout << "TopLeft" << '\n';
         if (mTopLeft) {
           isInserted = mTopLeft->insertPoint(aPoint);
         } else {
-          mTopLeft = createNode(mBorderXmin, mCenterX, mCenterY, mBorderYmax);
+          mTopLeft = createNode(mBorder.createTopLeft());
           if (mTopLeft) {
             isInserted = mTopLeft->insertPoint(aPoint);
           }
@@ -171,8 +190,7 @@ class Node {
         if (mBottomLeft) {
           isInserted = mBottomLeft->insertPoint(aPoint);
         } else {
-          mBottomLeft =
-              createNode(mBorderXmin, mCenterX, mBorderYmin, mCenterY);
+          mBottomLeft = createNode(mBorder.createBottomLeft());
           if (mBottomLeft) {
             isInserted = mBottomLeft->insertPoint(aPoint);
           }
@@ -193,12 +211,10 @@ class Node {
 
   std::optional<Point> findPoint(const Point& aPoint) {
     std::cout << "Find {" << aPoint.x << "," << aPoint.y << "}" << '\n';
-    std::cout << "Find in {" << mBorderXmin << "," << mBorderXmax << "}{"
-              << mBorderYmin << "," << mBorderYmax << "}" << '\n';
+    std::cout << "Find in " << mBorder << '\n';
     // Point out of borders
     // TODO: Rectangle method
-    if (aPoint.x > mBorderXmax || aPoint.x < mBorderXmin ||
-        aPoint.y > mBorderYmax || aPoint.y < mBorderYmin) {
+    if (!mBorder.isPointInside(aPoint)) {
       std::cout << "Find out of borders" << '\n';
       return std::nullopt;
     }
@@ -206,9 +222,11 @@ class Node {
     // No more points to search
     if (mPoint) {
       // Check if point found is close enough
-      if (std::abs(mPoint->x - aPoint.x) > kMinDistanceX || std::abs(mPoint->y - aPoint.y) > kMinDistanceY) {
-          std::cout << "Not close enough " << std::abs(mPoint->x - aPoint.x) << " " << std::abs(mPoint->y - aPoint.y) << "\n";
-          return std::nullopt;
+      if (std::abs(mPoint->x - aPoint.x) > kMinDistanceX ||
+          std::abs(mPoint->y - aPoint.y) > kMinDistanceY) {
+        std::cout << "Not close enough " << std::abs(mPoint->x - aPoint.x)
+                  << " " << std::abs(mPoint->y - aPoint.y) << "\n";
+        return std::nullopt;
       }
       std::cout << "Found\n";
       return mPoint;
@@ -248,28 +266,12 @@ class Node {
   }
 
  private:
-  Node(float aBorderXmin, float aBorderXmax, float aBorderYmin,
-       float aBorderYmax)
-      : mBorderXmin{aBorderXmin},
-        mBorderXmax{aBorderXmax},
-        mBorderYmin{aBorderYmin},
-        mBorderYmax{aBorderYmax} {
-    mCenterX = 0.5 * (mBorderXmin + mBorderXmax);
-    mCenterY = 0.5 * (mBorderYmin + mBorderYmax);
-    std::cout << "{" << mBorderXmin << "," << mBorderXmax << "}{" << mBorderYmin
-              << "," << mBorderYmax << "}" << '\n';
+  Node(const Rectangle& aBorder) : mBorder{aBorder} {
+    std::cout << "Node border " << mBorder << '\n';
   }
 
   // Node borders
-  // TODO: This should be rectangle
-  float mBorderXmax;
-  float mBorderXmin;
-  float mBorderYmax;
-  float mBorderYmin;
-
-  // Center point
-  float mCenterX;
-  float mCenterY;
+  Rectangle mBorder;
 
   // Stored point
   std::optional<Point> mPoint;
@@ -299,7 +301,7 @@ int main(int arcg, char* argv[]) {
   }
 
   // Root node
-  auto root = Node::createNode(kXmin, kXmax, kYmin, kYmax);
+  auto root = Node::createNode({kXmin, kXmax, kYmin, kYmax});
   if (!root) {
     std::cout << "Node range too small!\n";
     return EXIT_FAILURE;
