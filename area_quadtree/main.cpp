@@ -481,6 +481,43 @@ class Node {
     return findPointsInArea(getArea());
   }
 
+  std::vector<std::pair<Point, Rectangle>> getAreaInfo() {
+    if (mPoint) {
+      return {{*mPoint, mBorder}};
+    }
+
+    std::vector<std::pair<Point, Rectangle>> result;
+    // TODO: Replace recursion with iteration
+    if (mTopRight) {
+      std::cout << "Area info TopRight\n";
+      const auto areaInfo = mTopRight->getAreaInfo();
+      result.insert(std::end(result), std::cbegin(areaInfo),
+                    std::cend(areaInfo));
+    }
+
+    if (mTopLeft) {
+      std::cout << "Area info TopLeft\n";
+      const auto areaInfo = mTopLeft->getAreaInfo();
+      result.insert(std::end(result), std::cbegin(areaInfo),
+                    std::cend(areaInfo));
+    }
+
+    if (mBottomRight) {
+      std::cout << "Area info BottomRight\n";
+      const auto areaInfo = mBottomRight->getAreaInfo();
+      result.insert(std::end(result), std::cbegin(areaInfo),
+                    std::cend(areaInfo));
+    }
+
+    if (mBottomLeft) {
+      std::cout << "Area info BottomLeft\n";
+      const auto areaInfo = mBottomLeft->getAreaInfo();
+      result.insert(std::end(result), std::cbegin(areaInfo),
+                    std::cend(areaInfo));
+    }
+    return result;
+  }
+
  private:
   Node(const Rectangle& aBorder) : mBorder{aBorder} {
     std::cout << "Node border " << mBorder << '\n';
@@ -560,6 +597,14 @@ int main(int arcg, char* argv[]) {
             << pointsFoundInArea.size() << '\n';
   for (const auto& point : pointsFoundInArea) {
     std::cout << "Point in area: {" << point.x << "," << point.y << "}\n";
+  }
+
+  // Area info for each stored point
+  for (const auto& areaInfo : root->getAreaInfo()) {
+    std::cout << "=====\n";
+    std::cout << "Area info: {" << areaInfo.first.x << "," << areaInfo.first.y
+              << "} : " << areaInfo.second << '\n';
+    std::cout << "=====\n";
   }
 
   // Delete points in Quad Tree
