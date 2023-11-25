@@ -271,7 +271,7 @@ class Node {
     return std::nullopt;
   }
 
-  std::vector<Point> findPointsInArea(const Rectangle& aArea) {
+  std::vector<Point> findPointsInArea(const Rectangle& aArea) const {
     const auto overlap = calculateOverlap(mBorder, aArea);
 
     std::vector<Point> result;
@@ -475,6 +475,12 @@ class Node {
     return !(mPoint || mTopRight || mTopLeft || mBottomRight || mBottomLeft);
   }
 
+  Rectangle getArea() const { return mBorder; }
+
+  std::vector<Point> getAllPoints() const {
+    return findPointsInArea(getArea());
+  }
+
  private:
   Node(const Rectangle& aBorder) : mBorder{aBorder} {
     std::cout << "Node border " << mBorder << '\n';
@@ -513,7 +519,7 @@ int main(int arcg, char* argv[]) {
   // Root node
   auto root = Node::createNode({kXmin, kXmax, kYmin, kYmax});
   if (!root) {
-    std::cout << "Node range too small!\n";
+    std::cout << "Node area too small!\n";
     return EXIT_FAILURE;
   }
 
@@ -558,6 +564,11 @@ int main(int arcg, char* argv[]) {
 
   // Delete points in Quad Tree
   for (const auto& point : testPoints) {
+    std::cout << "=====\n";
+    std::cout << "Points in root:\n";
+    for (const auto& currentPoint : root->getAllPoints()) {
+      std::cout << "{" << currentPoint.x << "," << currentPoint.y << "}\n";
+    }
     std::cout << "=====\n";
     const auto isPointDeleted = root->deletePoint(point);
     std::cout << "Delete point: {" << point.x << "," << point.y << "} "
