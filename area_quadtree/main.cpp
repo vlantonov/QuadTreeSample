@@ -238,7 +238,7 @@ class Node {
       return mPoint;
     }
 
-    // TODO: Replace recursion with iteration
+    // TODO: Parallelization point
     if (mTopRight) {
       std::cout << "Search TopRight\n";
       if (auto pointFound = mTopRight->findPoint(aPoint)) {
@@ -289,7 +289,7 @@ class Node {
           return {*mPoint};
         }
 
-        // TODO: Replace recursion with iteration
+        // TODO: Parallelization point
         if (mTopRight) {
           std::cout << "Search area TopRight\n";
           const auto pointsFoundInArea = mTopRight->findPointsInArea(aArea);
@@ -320,7 +320,7 @@ class Node {
         return result;
 
       case Overlap::PARTIAL:
-        // TODO: Replace recursion with iteration
+        // TODO: Parallelization point
         std::cout << "Partial overlap between " << mBorder << " and " << aArea
                   << '\n';
         if (mTopRight) {
@@ -395,7 +395,7 @@ class Node {
     }
 
     bool isDeleted = false;
-    // TODO: Replace recursion with iteration
+    // TODO: Parallelization point
     if (mTopRight) {
       std::cout << "Delete in TopRight\n";
       if (mTopRight->deletePoint(aPoint)) {
@@ -487,7 +487,7 @@ class Node {
     }
 
     std::vector<std::pair<Point, Rectangle>> result;
-    // TODO: Replace recursion with iteration
+    // TODO: Parallelization point
     if (mTopRight) {
       std::cout << "Area info TopRight\n";
       const auto areaInfo = mTopRight->getAreaInfo();
