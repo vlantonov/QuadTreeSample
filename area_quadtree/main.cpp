@@ -17,10 +17,10 @@ constexpr float kXmax = 1.0;
 constexpr float kYmin = -1.0;
 constexpr float kYmax = 1.0;
 
-constexpr float kMinDistanceX = 0.001;
-constexpr float kMinDistanceY = 0.001;
+constexpr float kMinDistanceX = 1e-5;
+constexpr float kMinDistanceY = 1e-5;
 
-constexpr int kPointsNumber = 10;
+constexpr int kPointsNumber = 100000;
 
 class TimeBench {
  public:
@@ -572,9 +572,14 @@ int main(int arcg, char* argv[]) {
   std::uniform_real_distribution<float> distX{kXmin, kXmax};
   std::uniform_real_distribution<float> distY{kYmin, kYmax};
 
+  std::cout << "Points count: " << kPointsNumber << '\n';
+
   // Insert points in vector
-  for (int i = 0; i < kPointsNumber; i++) {
-    testPoints.emplace_back(distX(gen), distY(gen));
+  {
+    TimeBench bench{"Insert points in vector"};
+    for (int i = 0; i < kPointsNumber; i++) {
+      testPoints.emplace_back(distX(gen), distY(gen));
+    }
   }
 
   // Root node
@@ -585,26 +590,60 @@ int main(int arcg, char* argv[]) {
   }
 
   // Insert points in Quad Tree
-  for (const auto& point : testPoints) {
-    // std::cout << "===\n";
-    if (!root->insertPoint(point)) {
-      // std::cout << "Failed to insert point!" << '\n';
+  int insertedPoints = 0;
+  {
+    TimeBench bench{"Insert points in Quad Tree"};
+    for (const auto& point : testPoints) {
+      // std::cout << "===\n";
+      if (root->insertPoint(point)) {
+        insertedPoints++;
+      } else {
+        // std::cout << "Failed to insert point!" << '\n';
+      }
+      // std::cout << "===\n";
     }
-    // std::cout << "===\n";
+  }
+  if (insertedPoints != testPoints.size()) {
+    std::cout << "Expected points: " << testPoints.size()
+              << "  Inserted points: " << insertedPoints << '\n';
+  }
+
+  // Find points in vector
+  int pointsFound = 0;
+  {
+    TimeBench bench{"Find points in vector"};
+    for (const auto& point : testPoints) {
+      auto itFoundPoint =
+          std::find(std::begin(testPoints), std::end(testPoints), point);
+      if (std::end(testPoints) != itFoundPoint) {
+        pointsFound++;
+      }
+    }
+  }
+  if (pointsFound != testPoints.size()) {
+    std::cout << "Expected points: " << testPoints.size()
+              << "  Found points: " << pointsFound << '\n';
   }
 
   // Find points in Quad Tree
-  int pointsFound = 0;
-  for (const auto& point : testPoints) {
-    // std::cout << "=====\n";
-    const auto pointFound = root->findPoint(point);
-    // std::cout << "Find point: " << pointFound.has_value() << '\n';
-    if (pointFound) {
-      pointsFound++;
-      // std::cout << "Found point coordinates: {" << pointFound->x << "," <<
-      // pointFound->y << "}\n";
+  pointsFound = 0;
+  {
+    TimeBench bench{"Find points in Quad Tree"};
+    for (const auto& point : testPoints) {
+      // std::cout << "=====\n";
+      const auto pointFound = root->findPoint(point);
+      // std::cout << "Find point: " << pointFound.has_value() << '\n';
+      if (pointFound) {
+        pointsFound++;
+        // std::cout << "Found point coordinates: {" << pointFound->x << "," <<
+        // pointFound->y << "}\n";
+      }
+      // std::cout << "=====\n";
     }
-    // std::cout << "=====\n";
+  }
+  if (pointsFound != testPoints.size()) {
+    std::cout << "Expected points: " << testPoints.size()
+              << "  Found points: " << pointsFound << '\n';
   }
 
   // Missing point?
@@ -617,13 +656,26 @@ int main(int arcg, char* argv[]) {
 
   // Search points in area
   const Rectangle searchArea{-1.0, 0.0, -1.0, 0.0};
+  std::vector<Point> pointsFoundInArea;
 
-  const auto pointsFoundInArea = root->findPointsInArea(searchArea);
-  // std::cout << "Points found in area " << searchArea << " : " <<
-  // pointsFoundInArea.size() << '\n';
-  // for (const auto& point : pointsFoundInArea) {
-  //   std::cout << "Point in area: " << point << '\n';
-  // }
+  // Search points in area in vector
+  {
+    TimeBench bench{"Find points in area in vector"};
+    std::copy_if(std::begin(testPoints), std::end(testPoints),
+                 std::back_inserter(pointsFoundInArea),
+                 [&searchArea](const auto& aPoint) {
+                   return searchArea.isPointInside(aPoint);
+                 });
+  }
+  std::cout << "Points found in area: " << pointsFoundInArea.size() << '\n';
+
+  // Search points in area in Quad Tree
+  std::vector<Point> pointsFoundInAreaQT;
+  {
+    TimeBench bench{"Find points in area in Quad Tree"};
+    pointsFoundInAreaQT = root->findPointsInArea(searchArea);
+  }
+  std::cout << "Points found in area: " << pointsFoundInAreaQT.size() << '\n';
 
   // Area info for each stored point
   // for (const auto& areaInfo : root->getAreaInfo()) {
@@ -633,16 +685,28 @@ int main(int arcg, char* argv[]) {
   // }
 
   // Delete points in Quad Tree
-  for (const auto& point : testPoints) {
-    // std::cout << "=====\n";
-    // std::cout << "Points in root:\n";
-    // for (const auto& currentPoint : root->getAllPoints()) {
-    //   std::cout << currentPoint << '\n';
-    // }
-    // std::cout << "=====\n";
-    const auto isPointDeleted = root->deletePoint(point);
-    // std::cout << "Delete point: " << point << " " << isPointDeleted << '\n';
-    // std::cout << "=====\n";
+  int pointsDeleted = 0;
+  {
+    TimeBench bench{"Delete points in Quad Tree"};
+    for (const auto& point : testPoints) {
+      // std::cout << "=====\n";
+      // std::cout << "Points in root:\n";
+      // for (const auto& currentPoint : root->getAllPoints()) {
+      //   std::cout << currentPoint << '\n';
+      // }
+      // std::cout << "=====\n";
+      const auto isPointDeleted = root->deletePoint(point);
+      if (isPointDeleted) {
+        pointsDeleted++;
+      }
+      // std::cout << "Delete point: " << point << " " << isPointDeleted <<
+      // '\n'; std::cout << "=====\n";
+    }
+  }
+
+  if (pointsDeleted != testPoints.size()) {
+    std::cout << "Expected deleted points: " << testPoints.size()
+              << "  Deleted points: " << pointsDeleted << '\n';
   }
 
   // std::cout << "Root empty: " << root->isEmpty() << '\n';
