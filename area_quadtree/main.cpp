@@ -1,3 +1,4 @@
+#include <chrono>
 #include <cmath>
 #include <cstdlib>
 #include <iostream>
@@ -20,6 +21,25 @@ constexpr float kMinDistanceX = 0.001;
 constexpr float kMinDistanceY = 0.001;
 
 constexpr int kPointsNumber = 10;
+
+class TimeBench {
+ public:
+  TimeBench(std::string aLabel) : mLabel{std::move(aLabel)} {}
+
+  ~TimeBench() {
+    const auto endPoint = std::chrono::high_resolution_clock::now();
+    const auto processTime =
+        std::chrono::duration_cast<std::chrono::milliseconds>(endPoint -
+                                                              mStartPoint)
+            .count();
+    std::cout << mLabel << " : " << processTime << " milliseconds\n";
+  }
+
+ private:
+  const std::string mLabel;
+  const std::chrono::high_resolution_clock::time_point mStartPoint =
+      std::chrono::high_resolution_clock::now();
+};
 
 struct Point {
   float x{};
