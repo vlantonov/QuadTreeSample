@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <chrono>
 #include <cmath>
 #include <cstdlib>
@@ -43,6 +44,7 @@ class TimeBench {
 };
 
 struct Point {
+  Point(float aX, float aY) : x{aX}, y{aY} {}
   float x{};
   float y{};
 };
@@ -65,11 +67,11 @@ struct Rectangle {
         mXmax{std::max(aXmin, aXmax)},
         mYmin{std::min(aYmin, aYmax)},
         mYmax{std::max(aYmin, aYmax)} {
-    mCenterX = 0.5 * (mXmin + mXmax);
-    mCenterY = 0.5 * (mYmin + mYmax);
+    mCenterX = 0.5f * (mXmin + mXmax);
+    mCenterY = 0.5f * (mYmin + mYmax);
   }
 
-  bool isPointInside(const Point& aPoint) const {
+  [[nodiscard]] bool isPointInside(const Point& aPoint) const {
     if (aPoint.x > mXmax || aPoint.x < mXmin || aPoint.y > mYmax ||
         aPoint.y < mYmin) {
       // std::cout << "Out of borders" << '\n';
@@ -83,29 +85,31 @@ struct Rectangle {
              std::isfinite(mYmin) && std::isfinite(mYmax));
   }
 
-  float Xmin() const { return mXmin; }
+  [[nodiscard]] float Xmin() const { return mXmin; }
 
-  float Xmax() const { return mXmax; }
+  [[nodiscard]] float Xmax() const { return mXmax; }
 
-  float Ymin() const { return mYmin; }
+  [[nodiscard]] float Ymin() const { return mYmin; }
 
-  float Ymax() const { return mYmax; }
+  [[nodiscard]] float Ymax() const { return mYmax; }
 
-  float Xcenter() const { return mCenterX; }
+  [[nodiscard]] float Xcenter() const { return mCenterX; }
 
-  float Ycenter() const { return mCenterY; }
+  [[nodiscard]] float Ycenter() const { return mCenterY; }
 
-  Rectangle createTopRight() const {
+  [[nodiscard]] Rectangle createTopRight() const {
     return {mCenterX, mXmax, mCenterY, mYmax};
   }
 
-  Rectangle createBottomRight() const {
+  [[nodiscard]] Rectangle createBottomRight() const {
     return {mCenterX, mXmax, mYmin, mCenterY};
   }
 
-  Rectangle createTopLeft() const { return {mXmin, mCenterX, mCenterY, mYmax}; }
+  [[nodiscard]] Rectangle createTopLeft() const {
+    return {mXmin, mCenterX, mCenterY, mYmax};
+  }
 
-  Rectangle createBottomLeft() const {
+  [[nodiscard]] Rectangle createBottomLeft() const {
     return {mXmin, mCenterX, mYmin, mCenterY};
   }
 
@@ -297,7 +301,8 @@ class Node {
     return std::nullopt;
   }
 
-  std::list<Point> findPointsInArea(const Rectangle& aArea) const {
+  [[nodiscard]] std::list<Point> findPointsInArea(
+      const Rectangle& aArea) const {
     const auto overlap = calculateOverlap(mBorder, aArea);
 
     std::list<Point> result;
@@ -492,13 +497,15 @@ class Node {
     return isDeleted;
   }
 
-  bool isEmpty() const {
+  [[nodiscard]] bool isEmpty() const {
     return !(mPoint || mTopRight || mTopLeft || mBottomRight || mBottomLeft);
   }
 
-  Rectangle getArea() const { return mBorder; }
+  [[nodiscard]] Rectangle getArea() const { return mBorder; }
 
-  std::list<Point> getAllPoints() const { return findPointsInArea(getArea()); }
+  [[nodiscard]] std::list<Point> getAllPoints() const {
+    return findPointsInArea(getArea());
+  }
 
   std::vector<std::pair<Point, Rectangle>> getAreaInfo() {
     if (mPoint) {
@@ -555,7 +562,7 @@ class Node {
   std::unique_ptr<Node> mBottomLeft;
 };
 
-int main(int arcg, char* argv[]) {
+int main(int /*argc*/, char* /*argv*/[]) {
   std::vector<Point> testPoints;
   testPoints.reserve(kPointsNumber);
 
