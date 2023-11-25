@@ -9,7 +9,7 @@
 // Random device seed
 constexpr auto kSeed = 1234;
 
-constexpr float epsilon = 1e-6;
+constexpr float kEpsilon = 1e-6;
 
 constexpr float kXmin = -1.0;
 constexpr float kXmax = 1.0;
@@ -25,6 +25,15 @@ struct Point {
   float x{};
   float y{};
 };
+
+bool operator== (const Point& lhs, const Point& rhs) {
+  return (std::abs(lhs.x - rhs.x) < kEpsilon &&
+          std::abs(lhs.y - lhs.y) < kEpsilon);
+}
+
+bool operator!= (const Point& lhs, const Point& rhs){
+  return !(lhs == rhs);
+}
 
 struct Rectangle {
   Rectangle(float aXmin, float aXmax, float aYmin, float aYmax)
@@ -115,7 +124,7 @@ Overlap calculateOverlap(const Rectangle& lhs, const Rectangle& rhs) {
   // const auto iou =
   //     intersectionArea / float(lhsArea + rhsArea - intersectionArea);
 
-  if (std::abs(intersectionArea - minaArea) < epsilon) {
+  if (std::abs(intersectionArea - minaArea) < kEpsilon) {
     return Overlap::YES;
   }
 
@@ -212,8 +221,8 @@ class Node {
   std::optional<Point> findPoint(const Point& aPoint) {
     std::cout << "Find {" << aPoint.x << "," << aPoint.y << "}" << '\n';
     std::cout << "Find in " << mBorder << '\n';
+
     // Point out of borders
-    // TODO: Rectangle method
     if (!mBorder.isPointInside(aPoint)) {
       std::cout << "Find out of borders" << '\n';
       return std::nullopt;
@@ -222,8 +231,7 @@ class Node {
     // No more points to search
     if (mPoint) {
       // Check if point found is close enough
-      if (std::abs(mPoint->x - aPoint.x) > kMinDistanceX ||
-          std::abs(mPoint->y - aPoint.y) > kMinDistanceY) {
+      if (*mPoint != aPoint) {
         std::cout << "Not close enough " << std::abs(mPoint->x - aPoint.x)
                   << " " << std::abs(mPoint->y - aPoint.y) << "\n";
         return std::nullopt;
