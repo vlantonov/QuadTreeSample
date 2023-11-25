@@ -2,6 +2,7 @@
 #include <cmath>
 #include <cstdlib>
 #include <iostream>
+#include <list>
 #include <memory>
 #include <optional>
 #include <random>
@@ -296,10 +297,10 @@ class Node {
     return std::nullopt;
   }
 
-  std::vector<Point> findPointsInArea(const Rectangle& aArea) const {
+  std::list<Point> findPointsInArea(const Rectangle& aArea) const {
     const auto overlap = calculateOverlap(mBorder, aArea);
 
-    std::vector<Point> result;
+    std::list<Point> result;
     switch (overlap) {
       case Overlap::NO:
         // std::cout << "No overlap between " << mBorder << " and " << aArea <<
@@ -316,30 +317,26 @@ class Node {
         // TODO: Parallelization point
         if (mTopRight) {
           // std::cout << "Search area TopRight\n";
-          const auto pointsFoundInArea = mTopRight->findPointsInArea(aArea);
-          result.insert(std::end(result), std::cbegin(pointsFoundInArea),
-                        std::cend(pointsFoundInArea));
+          auto&& pointsFoundInArea = mTopRight->findPointsInArea(aArea);
+          result.splice(std::end(result), std::move(pointsFoundInArea));
         }
 
         if (mTopLeft) {
           // std::cout << "Search area TopLeft\n";
-          const auto pointsFoundInArea = mTopLeft->findPointsInArea(aArea);
-          result.insert(std::end(result), std::cbegin(pointsFoundInArea),
-                        std::cend(pointsFoundInArea));
+          auto&& pointsFoundInArea = mTopLeft->findPointsInArea(aArea);
+          result.splice(std::end(result), std::move(pointsFoundInArea));
         }
 
         if (mBottomRight) {
           // std::cout << "Search area BottomRight\n";
-          const auto pointsFoundInArea = mBottomRight->findPointsInArea(aArea);
-          result.insert(std::end(result), std::cbegin(pointsFoundInArea),
-                        std::cend(pointsFoundInArea));
+          auto&& pointsFoundInArea = mBottomRight->findPointsInArea(aArea);
+          result.splice(std::end(result), std::move(pointsFoundInArea));
         }
 
         if (mBottomLeft) {
           // std::cout << "Search area BottomLeft\n";
-          const auto pointsFoundInArea = mBottomLeft->findPointsInArea(aArea);
-          result.insert(std::end(result), std::cbegin(pointsFoundInArea),
-                        std::cend(pointsFoundInArea));
+          auto&& pointsFoundInArea = mBottomLeft->findPointsInArea(aArea);
+          result.splice(std::end(result), std::move(pointsFoundInArea));
         }
         return result;
 
@@ -501,9 +498,7 @@ class Node {
 
   Rectangle getArea() const { return mBorder; }
 
-  std::vector<Point> getAllPoints() const {
-    return findPointsInArea(getArea());
-  }
+  std::list<Point> getAllPoints() const { return findPointsInArea(getArea()); }
 
   std::vector<std::pair<Point, Rectangle>> getAreaInfo() {
     if (mPoint) {
@@ -670,7 +665,7 @@ int main(int arcg, char* argv[]) {
   std::cout << "Points found in area: " << pointsFoundInArea.size() << '\n';
 
   // Search points in area in Quad Tree
-  std::vector<Point> pointsFoundInAreaQT;
+  std::list<Point> pointsFoundInAreaQT;
   {
     TimeBench bench{"Find points in area in Quad Tree"};
     pointsFoundInAreaQT = root->findPointsInArea(searchArea);
