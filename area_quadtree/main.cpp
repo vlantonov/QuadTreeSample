@@ -33,6 +33,11 @@ bool operator==(const Point& lhs, const Point& rhs) {
 
 bool operator!=(const Point& lhs, const Point& rhs) { return !(lhs == rhs); }
 
+std::ostream& operator<<(std::ostream& os, const Point& data) {
+  os << "{" << data.x << "," << data.y << "}";
+  return os;
+}
+
 struct Rectangle {
   Rectangle(float aXmin, float aXmax, float aYmin, float aYmax)
       : mXmin{std::min(aXmin, aXmax)},
@@ -143,7 +148,7 @@ class Node {
   }
 
   bool insertPoint(const Point& aPoint) {
-    std::cout << "{" << aPoint.x << "," << aPoint.y << "}" << '\n';
+    std::cout << "Insert " << aPoint << '\n';
     // Point out of borders
     if (!mBorder.isPointInside(aPoint)) {
       std::cout << "Out of borders" << '\n';
@@ -217,7 +222,7 @@ class Node {
   }
 
   std::optional<Point> findPoint(const Point& aPoint) {
-    std::cout << "Find {" << aPoint.x << "," << aPoint.y << "}" << '\n';
+    std::cout << "Find " << aPoint << '\n';
     std::cout << "Find in " << mBorder << '\n';
 
     // Point out of borders
@@ -371,7 +376,7 @@ class Node {
   }
 
   bool deletePoint(const Point& aPoint) {
-    std::cout << "Delete {" << aPoint.x << "," << aPoint.y << "}" << '\n';
+    std::cout << "Delete " << aPoint << '\n';
     std::cout << "Delete in " << mBorder << '\n';
 
     // Point out of borders
@@ -596,14 +601,14 @@ int main(int arcg, char* argv[]) {
   std::cout << "Points found in area " << searchArea << " : "
             << pointsFoundInArea.size() << '\n';
   for (const auto& point : pointsFoundInArea) {
-    std::cout << "Point in area: {" << point.x << "," << point.y << "}\n";
+    std::cout << "Point in area: " << point << '\n';
   }
 
   // Area info for each stored point
   for (const auto& areaInfo : root->getAreaInfo()) {
     std::cout << "=====\n";
-    std::cout << "Area info: {" << areaInfo.first.x << "," << areaInfo.first.y
-              << "} : " << areaInfo.second << '\n';
+    std::cout << "Area info: " << areaInfo.first << " : " << areaInfo.second
+              << '\n';
     std::cout << "=====\n";
   }
 
@@ -612,12 +617,11 @@ int main(int arcg, char* argv[]) {
     std::cout << "=====\n";
     std::cout << "Points in root:\n";
     for (const auto& currentPoint : root->getAllPoints()) {
-      std::cout << "{" << currentPoint.x << "," << currentPoint.y << "}\n";
+      std::cout << currentPoint << '\n';
     }
     std::cout << "=====\n";
     const auto isPointDeleted = root->deletePoint(point);
-    std::cout << "Delete point: {" << point.x << "," << point.y << "} "
-              << isPointDeleted << '\n';
+    std::cout << "Delete point: " << point << " " << isPointDeleted << '\n';
     std::cout << "=====\n";
   }
 
