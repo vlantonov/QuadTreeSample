@@ -71,7 +71,7 @@ struct Rectangle {
   bool isPointInside(const Point& aPoint) const {
     if (aPoint.x > mXmax || aPoint.x < mXmin || aPoint.y > mYmax ||
         aPoint.y < mYmin) {
-      std::cout << "Out of borders" << '\n';
+      // std::cout << "Out of borders" << '\n';
       return false;
     }
     return true;
@@ -168,24 +168,24 @@ class Node {
   }
 
   bool insertPoint(const Point& aPoint) {
-    std::cout << "Insert " << aPoint << '\n';
+    // std::cout << "Insert " << aPoint << '\n';
     // Point out of borders
     if (!mBorder.isPointInside(aPoint)) {
-      std::cout << "Out of borders" << '\n';
+      // std::cout << "Out of borders" << '\n';
       return false;
     }
 
     // No previously stored point and no child nodes
     if (!mPoint && !(mTopRight || mTopLeft || mBottomRight || mBottomLeft)) {
       mPoint = aPoint;
-      std::cout << "Point inserted" << '\n';
+      // std::cout << "Point inserted" << '\n';
       return true;
     }
 
     bool isInserted = false;
     if (aPoint.x > mBorder.Xcenter()) {
       if (aPoint.y > mBorder.Ycenter()) {
-        std::cout << "TopRight" << '\n';
+        // std::cout << "TopRight" << '\n';
         if (mTopRight) {
           isInserted = mTopRight->insertPoint(aPoint);
         } else {
@@ -195,7 +195,7 @@ class Node {
           }
         }
       } else {
-        std::cout << "BottomRight" << '\n';
+        // std::cout << "BottomRight" << '\n';
         if (mBottomRight) {
           isInserted = mBottomRight->insertPoint(aPoint);
         } else {
@@ -208,7 +208,7 @@ class Node {
 
     } else {
       if (aPoint.y > mBorder.Ycenter()) {
-        std::cout << "TopLeft" << '\n';
+        // std::cout << "TopLeft" << '\n';
         if (mTopLeft) {
           isInserted = mTopLeft->insertPoint(aPoint);
         } else {
@@ -218,7 +218,7 @@ class Node {
           }
         }
       } else {
-        std::cout << "BottomLeft" << '\n';
+        // std::cout << "BottomLeft" << '\n';
         if (mBottomLeft) {
           isInserted = mBottomLeft->insertPoint(aPoint);
         } else {
@@ -232,7 +232,7 @@ class Node {
 
     // If new node is created then move the stored point
     if (isInserted && mPoint) {
-      std::cout << "Rebalance point" << '\n';
+      // std::cout << "Rebalance point" << '\n';
       const auto rebalancedPoint = std::move(mPoint.value());
       mPoint.reset();
       return insertPoint(rebalancedPoint);
@@ -242,12 +242,12 @@ class Node {
   }
 
   std::optional<Point> findPoint(const Point& aPoint) {
-    std::cout << "Find " << aPoint << '\n';
-    std::cout << "Find in " << mBorder << '\n';
+    // std::cout << "Find " << aPoint << '\n';
+    // std::cout << "Find in " << mBorder << '\n';
 
     // Point out of borders
     if (!mBorder.isPointInside(aPoint)) {
-      std::cout << "Find out of borders" << '\n';
+      // std::cout << "Find out of borders" << '\n';
       return std::nullopt;
     }
 
@@ -255,44 +255,44 @@ class Node {
     if (mPoint) {
       // Check if point found is close enough
       if (*mPoint != aPoint) {
-        std::cout << "Not close enough " << std::abs(mPoint->x - aPoint.x)
-                  << " " << std::abs(mPoint->y - aPoint.y) << "\n";
+        // std::cout << "Not close enough " << std::abs(mPoint->x - aPoint.x)
+        //           << " " << std::abs(mPoint->y - aPoint.y) << "\n";
         return std::nullopt;
       }
-      std::cout << "Found\n";
+      // std::cout << "Found\n";
       return mPoint;
     }
 
     // TODO: Parallelization point
     if (mTopRight) {
-      std::cout << "Search TopRight\n";
+      // std::cout << "Search TopRight\n";
       if (auto pointFound = mTopRight->findPoint(aPoint)) {
         return pointFound;
       }
     }
 
     if (mTopLeft) {
-      std::cout << "Search TopLeft\n";
+      // std::cout << "Search TopLeft\n";
       if (auto pointFound = mTopLeft->findPoint(aPoint)) {
         return pointFound;
       }
     }
 
     if (mBottomRight) {
-      std::cout << "Search BottomRight\n";
+      // std::cout << "Search BottomRight\n";
       if (auto pointFound = mBottomRight->findPoint(aPoint)) {
         return pointFound;
       }
     }
 
     if (mBottomLeft) {
-      std::cout << "Search BottomLeft\n";
+      // std::cout << "Search BottomLeft\n";
       if (auto pointFound = mBottomLeft->findPoint(aPoint)) {
         return pointFound;
       }
     }
 
-    std::cout << "Not Found\n";
+    // std::cout << "Not Found\n";
     return std::nullopt;
   }
 
@@ -302,42 +302,41 @@ class Node {
     std::vector<Point> result;
     switch (overlap) {
       case Overlap::NO:
-        std::cout << "No overlap between " << mBorder << " and " << aArea
-                  << '\n';
+        // std::cout << "No overlap between " << mBorder << " and " << aArea <<
+        // '\n';
         return {};
       case Overlap::YES:
-        std::cout << "Full overlap between " << mBorder << " and " << aArea
-                  << '\n';
-        // Leaf node
+        // std::cout << "Full overlap between " << mBorder << " and " << aArea
+        // << '\n'; Leaf node
         if (mPoint) {
-          std::cout << "Point found in area\n";
+          // std::cout << "Point found in area\n";
           return {*mPoint};
         }
 
         // TODO: Parallelization point
         if (mTopRight) {
-          std::cout << "Search area TopRight\n";
+          // std::cout << "Search area TopRight\n";
           const auto pointsFoundInArea = mTopRight->findPointsInArea(aArea);
           result.insert(std::end(result), std::cbegin(pointsFoundInArea),
                         std::cend(pointsFoundInArea));
         }
 
         if (mTopLeft) {
-          std::cout << "Search area TopLeft\n";
+          // std::cout << "Search area TopLeft\n";
           const auto pointsFoundInArea = mTopLeft->findPointsInArea(aArea);
           result.insert(std::end(result), std::cbegin(pointsFoundInArea),
                         std::cend(pointsFoundInArea));
         }
 
         if (mBottomRight) {
-          std::cout << "Search area BottomRight\n";
+          // std::cout << "Search area BottomRight\n";
           const auto pointsFoundInArea = mBottomRight->findPointsInArea(aArea);
           result.insert(std::end(result), std::cbegin(pointsFoundInArea),
                         std::cend(pointsFoundInArea));
         }
 
         if (mBottomLeft) {
-          std::cout << "Search area BottomLeft\n";
+          // std::cout << "Search area BottomLeft\n";
           const auto pointsFoundInArea = mBottomLeft->findPointsInArea(aArea);
           result.insert(std::end(result), std::cbegin(pointsFoundInArea),
                         std::cend(pointsFoundInArea));
@@ -346,10 +345,10 @@ class Node {
 
       case Overlap::PARTIAL:
         // TODO: Parallelization point
-        std::cout << "Partial overlap between " << mBorder << " and " << aArea
-                  << '\n';
+        // std::cout << "Partial overlap between " << mBorder << " and " <<
+        // aArea << '\n';
         if (mTopRight) {
-          std::cout << "Search area TopRight\n";
+          // std::cout << "Search area TopRight\n";
           const auto pointsFoundInArea = mTopRight->findPointsInArea(aArea);
           std::copy_if(std::cbegin(pointsFoundInArea),
                        std::cend(pointsFoundInArea), std::back_inserter(result),
@@ -359,7 +358,7 @@ class Node {
         }
 
         if (mTopLeft) {
-          std::cout << "Search area TopLeft\n";
+          // std::cout << "Search area TopLeft\n";
           const auto pointsFoundInArea = mTopLeft->findPointsInArea(aArea);
           std::copy_if(std::cbegin(pointsFoundInArea),
                        std::cend(pointsFoundInArea), std::back_inserter(result),
@@ -369,7 +368,7 @@ class Node {
         }
 
         if (mBottomRight) {
-          std::cout << "Search area BottomRight\n";
+          // std::cout << "Search area BottomRight\n";
           const auto pointsFoundInArea = mBottomRight->findPointsInArea(aArea);
           std::copy_if(std::cbegin(pointsFoundInArea),
                        std::cend(pointsFoundInArea), std::back_inserter(result),
@@ -379,7 +378,7 @@ class Node {
         }
 
         if (mBottomLeft) {
-          std::cout << "Search area BottomLeft\n";
+          // std::cout << "Search area BottomLeft\n";
           const auto pointsFoundInArea = mBottomLeft->findPointsInArea(aArea);
           std::copy_if(std::cbegin(pointsFoundInArea),
                        std::cend(pointsFoundInArea), std::back_inserter(result),
@@ -390,18 +389,18 @@ class Node {
         return result;
     }
 
-    std::cout << "Unhandled overlap value: " << static_cast<int>(overlap)
-              << "\n";
+    // std::cout << "Unhandled overlap value: " << static_cast<int>(overlap) <<
+    // "\n";
     return {};
   }
 
   bool deletePoint(const Point& aPoint) {
-    std::cout << "Delete " << aPoint << '\n';
-    std::cout << "Delete in " << mBorder << '\n';
+    // std::cout << "Delete " << aPoint << '\n';
+    // std::cout << "Delete in " << mBorder << '\n';
 
     // Point out of borders
     if (!mBorder.isPointInside(aPoint)) {
-      std::cout << "Delete out of borders" << '\n';
+      // std::cout << "Delete out of borders" << '\n';
       return false;
     }
 
@@ -409,12 +408,12 @@ class Node {
     if (mPoint) {
       // Check if point found is close enough
       if (*mPoint != aPoint) {
-        std::cout << "Not close enough to delete"
-                  << std::abs(mPoint->x - aPoint.x) << " "
-                  << std::abs(mPoint->y - aPoint.y) << "\n";
+        // std::cout << "Not close enough to delete"
+        //           << std::abs(mPoint->x - aPoint.x) << " "
+        //           << std::abs(mPoint->y - aPoint.y) << "\n";
         return false;
       }
-      std::cout << "Deleted\n";
+      // std::cout << "Deleted\n";
       mPoint = std::nullopt;
       return true;
     }
@@ -422,7 +421,7 @@ class Node {
     bool isDeleted = false;
     // TODO: Parallelization point
     if (mTopRight) {
-      std::cout << "Delete in TopRight\n";
+      // std::cout << "Delete in TopRight\n";
       if (mTopRight->deletePoint(aPoint)) {
         isDeleted = true;
         if (mTopRight->isEmpty()) {
@@ -432,7 +431,7 @@ class Node {
     }
 
     if (mTopLeft) {
-      std::cout << "Delete in TopLeft\n";
+      // std::cout << "Delete in TopLeft\n";
       if (mTopLeft->deletePoint(aPoint)) {
         isDeleted = true;
         if (mTopLeft->isEmpty()) {
@@ -442,7 +441,7 @@ class Node {
     }
 
     if (mBottomRight) {
-      std::cout << "Delete in BottomRight\n";
+      // std::cout << "Delete in BottomRight\n";
       if (mBottomRight->deletePoint(aPoint)) {
         isDeleted = true;
         if (mBottomRight->isEmpty()) {
@@ -452,7 +451,7 @@ class Node {
     }
 
     if (mBottomLeft) {
-      std::cout << "Delete in BottomLeft\n";
+      // std::cout << "Delete in BottomLeft\n";
       if (mBottomLeft->deletePoint(aPoint)) {
         isDeleted = true;
         if (mBottomLeft->isEmpty()) {
@@ -469,25 +468,25 @@ class Node {
     if (activeTopRight + activeTopLeft + activeBottomRight + activeBottomLeft ==
         1) {
       if (mTopRight && mTopRight->mPoint) {
-        std::cout << "Rebalance after delete in TopRight\n";
+        // std::cout << "Rebalance after delete in TopRight\n";
         mPoint = mTopRight->mPoint;
         mTopRight.reset();
       }
 
       if (mTopLeft && mTopLeft->mPoint) {
-        std::cout << "Rebalance after delete in TopLeft\n";
+        // std::cout << "Rebalance after delete in TopLeft\n";
         mPoint = mTopLeft->mPoint;
         mTopLeft.reset();
       }
 
       if (mBottomRight && mBottomRight->mPoint) {
-        std::cout << "Rebalance after delete in BottomRight\n";
+        // std::cout << "Rebalance after delete in BottomRight\n";
         mPoint = mBottomRight->mPoint;
         mBottomRight.reset();
       }
 
       if (mBottomLeft && mBottomLeft->mPoint) {
-        std::cout << "Rebalance after delete in BottomLeft\n";
+        // std::cout << "Rebalance after delete in BottomLeft\n";
         mPoint = mBottomLeft->mPoint;
         mBottomLeft.reset();
       }
@@ -514,28 +513,28 @@ class Node {
     std::vector<std::pair<Point, Rectangle>> result;
     // TODO: Parallelization point
     if (mTopRight) {
-      std::cout << "Area info TopRight\n";
+      // std::cout << "Area info TopRight\n";
       const auto areaInfo = mTopRight->getAreaInfo();
       result.insert(std::end(result), std::cbegin(areaInfo),
                     std::cend(areaInfo));
     }
 
     if (mTopLeft) {
-      std::cout << "Area info TopLeft\n";
+      // std::cout << "Area info TopLeft\n";
       const auto areaInfo = mTopLeft->getAreaInfo();
       result.insert(std::end(result), std::cbegin(areaInfo),
                     std::cend(areaInfo));
     }
 
     if (mBottomRight) {
-      std::cout << "Area info BottomRight\n";
+      // std::cout << "Area info BottomRight\n";
       const auto areaInfo = mBottomRight->getAreaInfo();
       result.insert(std::end(result), std::cbegin(areaInfo),
                     std::cend(areaInfo));
     }
 
     if (mBottomLeft) {
-      std::cout << "Area info BottomLeft\n";
+      // std::cout << "Area info BottomLeft\n";
       const auto areaInfo = mBottomLeft->getAreaInfo();
       result.insert(std::end(result), std::cbegin(areaInfo),
                     std::cend(areaInfo));
@@ -545,7 +544,7 @@ class Node {
 
  private:
   Node(const Rectangle& aBorder) : mBorder{aBorder} {
-    std::cout << "Node border " << mBorder << '\n';
+    // std::cout << "Node border " << mBorder << '\n';
   }
 
   // Node borders
@@ -587,65 +586,66 @@ int main(int arcg, char* argv[]) {
 
   // Insert points in Quad Tree
   for (const auto& point : testPoints) {
-    std::cout << "===\n";
+    // std::cout << "===\n";
     if (!root->insertPoint(point)) {
-      std::cout << "Failed to insert point!" << '\n';
+      // std::cout << "Failed to insert point!" << '\n';
     }
-    std::cout << "===\n";
+    // std::cout << "===\n";
   }
 
   // Find points in Quad Tree
+  int pointsFound = 0;
   for (const auto& point : testPoints) {
-    std::cout << "=====\n";
+    // std::cout << "=====\n";
     const auto pointFound = root->findPoint(point);
-    std::cout << "Find point: " << pointFound.has_value() << '\n';
+    // std::cout << "Find point: " << pointFound.has_value() << '\n';
     if (pointFound) {
-      std::cout << "Found point coordinates: {" << pointFound->x << ","
-                << pointFound->y << "}\n";
+      pointsFound++;
+      // std::cout << "Found point coordinates: {" << pointFound->x << "," <<
+      // pointFound->y << "}\n";
     }
-    std::cout << "=====\n";
+    // std::cout << "=====\n";
   }
 
   // Missing point?
-  const auto pointFound = root->findPoint(Point{0.1, 0.1});
-  std::cout << "Find point: " << pointFound.has_value() << '\n';
-  if (pointFound) {
-    std::cout << "Found point coordinates: {" << pointFound->x << ","
-              << pointFound->y << "}\n";
-  }
+  // const auto pointFound = root->findPoint(Point{0.1, 0.1});
+  // std::cout << "Find point: " << pointFound.has_value() << '\n';
+  // if (pointFound) {
+  //   std::cout << "Found point coordinates: {" << pointFound->x << "," <<
+  //   pointFound->y << "}\n";
+  // }
 
   // Search points in area
   const Rectangle searchArea{-1.0, 0.0, -1.0, 0.0};
 
   const auto pointsFoundInArea = root->findPointsInArea(searchArea);
-  std::cout << "Points found in area " << searchArea << " : "
-            << pointsFoundInArea.size() << '\n';
-  for (const auto& point : pointsFoundInArea) {
-    std::cout << "Point in area: " << point << '\n';
-  }
+  // std::cout << "Points found in area " << searchArea << " : " <<
+  // pointsFoundInArea.size() << '\n';
+  // for (const auto& point : pointsFoundInArea) {
+  //   std::cout << "Point in area: " << point << '\n';
+  // }
 
   // Area info for each stored point
-  for (const auto& areaInfo : root->getAreaInfo()) {
-    std::cout << "=====\n";
-    std::cout << "Area info: " << areaInfo.first << " : " << areaInfo.second
-              << '\n';
-    std::cout << "=====\n";
-  }
+  // for (const auto& areaInfo : root->getAreaInfo()) {
+  //   std::cout << "=====\n";
+  //   std::cout << "Area info: " << areaInfo.first << " : " << areaInfo.second
+  //   << '\n'; std::cout << "=====\n";
+  // }
 
   // Delete points in Quad Tree
   for (const auto& point : testPoints) {
-    std::cout << "=====\n";
-    std::cout << "Points in root:\n";
-    for (const auto& currentPoint : root->getAllPoints()) {
-      std::cout << currentPoint << '\n';
-    }
-    std::cout << "=====\n";
+    // std::cout << "=====\n";
+    // std::cout << "Points in root:\n";
+    // for (const auto& currentPoint : root->getAllPoints()) {
+    //   std::cout << currentPoint << '\n';
+    // }
+    // std::cout << "=====\n";
     const auto isPointDeleted = root->deletePoint(point);
-    std::cout << "Delete point: " << point << " " << isPointDeleted << '\n';
-    std::cout << "=====\n";
+    // std::cout << "Delete point: " << point << " " << isPointDeleted << '\n';
+    // std::cout << "=====\n";
   }
 
-  std::cout << "Root empty: " << root->isEmpty() << '\n';
+  // std::cout << "Root empty: " << root->isEmpty() << '\n';
 
   std::cout << "Done.\n";
 
