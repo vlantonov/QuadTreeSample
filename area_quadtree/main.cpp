@@ -26,14 +26,12 @@ struct Point {
   float y{};
 };
 
-bool operator== (const Point& lhs, const Point& rhs) {
+bool operator==(const Point& lhs, const Point& rhs) {
   return (std::abs(lhs.x - rhs.x) < kEpsilon &&
           std::abs(lhs.y - lhs.y) < kEpsilon);
 }
 
-bool operator!= (const Point& lhs, const Point& rhs){
-  return !(lhs == rhs);
-}
+bool operator!=(const Point& lhs, const Point& rhs) { return !(lhs == rhs); }
 
 struct Rectangle {
   Rectangle(float aXmin, float aXmax, float aYmin, float aYmax)
@@ -372,6 +370,111 @@ class Node {
     return {};
   }
 
+  bool deletePoint(const Point& aPoint) {
+    std::cout << "Delete {" << aPoint.x << "," << aPoint.y << "}" << '\n';
+    std::cout << "Delete in " << mBorder << '\n';
+
+    // Point out of borders
+    if (!mBorder.isPointInside(aPoint)) {
+      std::cout << "Delete out of borders" << '\n';
+      return false;
+    }
+
+    // Leaf - one point to be deleted
+    if (mPoint) {
+      // Check if point found is close enough
+      if (*mPoint != aPoint) {
+        std::cout << "Not close enough to delete"
+                  << std::abs(mPoint->x - aPoint.x) << " "
+                  << std::abs(mPoint->y - aPoint.y) << "\n";
+        return false;
+      }
+      std::cout << "Deleted\n";
+      mPoint = std::nullopt;
+      return true;
+    }
+
+    bool isDeleted = false;
+    // TODO: Replace recursion with iteration
+    if (mTopRight) {
+      std::cout << "Delete in TopRight\n";
+      if (mTopRight->deletePoint(aPoint)) {
+        isDeleted = true;
+        if (mTopRight->isEmpty()) {
+          mTopRight.reset();
+        }
+      }
+    }
+
+    if (mTopLeft) {
+      std::cout << "Delete in TopLeft\n";
+      if (mTopLeft->deletePoint(aPoint)) {
+        isDeleted = true;
+        if (mTopLeft->isEmpty()) {
+          mTopLeft.reset();
+        }
+      }
+    }
+
+    if (mBottomRight) {
+      std::cout << "Delete in BottomRight\n";
+      if (mBottomRight->deletePoint(aPoint)) {
+        isDeleted = true;
+        if (mBottomRight->isEmpty()) {
+          mBottomRight.reset();
+        }
+      }
+    }
+
+    if (mBottomLeft) {
+      std::cout << "Delete in BottomLeft\n";
+      if (mBottomLeft->deletePoint(aPoint)) {
+        isDeleted = true;
+        if (mBottomLeft->isEmpty()) {
+          mBottomLeft.reset();
+        }
+      }
+    }
+
+    // Rebalance last remaining leaf
+    const int activeTopRight = static_cast<bool>(mTopRight);
+    const int activeTopLeft = static_cast<bool>(mTopLeft);
+    const int activeBottomRight = static_cast<bool>(mBottomRight);
+    const int activeBottomLeft = static_cast<bool>(mBottomLeft);
+    if (activeTopRight + activeTopLeft + activeBottomRight + activeBottomLeft ==
+        1) {
+      if (mTopRight && mTopRight->mPoint) {
+        std::cout << "Rebalance after delete in TopRight\n";
+        mPoint = mTopRight->mPoint;
+        mTopRight.reset();
+      }
+
+      if (mTopLeft && mTopLeft->mPoint) {
+        std::cout << "Rebalance after delete in TopLeft\n";
+        mPoint = mTopLeft->mPoint;
+        mTopLeft.reset();
+      }
+
+      if (mBottomRight && mBottomRight->mPoint) {
+        std::cout << "Rebalance after delete in BottomRight\n";
+        mPoint = mBottomRight->mPoint;
+        mBottomRight.reset();
+      }
+
+      if (mBottomLeft && mBottomLeft->mPoint) {
+        std::cout << "Rebalance after delete in BottomLeft\n";
+        mPoint = mBottomLeft->mPoint;
+        mBottomLeft.reset();
+      }
+    }
+
+    return isDeleted;
+  }
+
+  bool isEmpty() const {
+    return !(mPoint || mTopRight || mTopLeft || mBottomRight || mBottomLeft);
+  }
+
  private:
   Node(const Rectangle& aBorder) : mBorder{aBorder} {
     std::cout << "Node border " << mBorder << '\n';
@@ -452,6 +555,17 @@ int main(int arcg, char* argv[]) {
   for (const auto& point : pointsFoundInArea) {
     std::cout << "Point in area: {" << point.x << "," << point.y << "}\n";
   }
+
+  // Delete points in Quad Tree
+  for (const auto& point : testPoints) {
+    std::cout << "=====\n";
+    const auto isPointDeleted = root->deletePoint(point);
+    std::cout << "Delete point: {" << point.x << "," << point.y << "} "
+              << isPointDeleted << '\n';
+    std::cout << "=====\n";
+  }
+
+  std::cout << "Root empty: " << root->isEmpty() << '\n';
 
   std::cout << "Done.\n";
 
