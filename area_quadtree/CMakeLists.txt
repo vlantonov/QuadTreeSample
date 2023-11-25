@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.22)
 
-project(PointQuadTree)
+project(AreaQuadTree)
 
 add_executable(
     ${PROJECT_NAME}
