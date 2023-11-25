@@ -156,13 +156,13 @@ Overlap calculateOverlap(const Rectangle& lhs, const Rectangle& rhs) {
 
 class Node {
  public:
-  static std::shared_ptr<Node> createNode(const Rectangle& aBorder) {
+  static std::unique_ptr<Node> createNode(const Rectangle& aBorder) {
     if (std::abs(aBorder.Xmax() - aBorder.Xmin()) < kMinDistanceX ||
         std::abs(aBorder.Ymax() - aBorder.Ymin()) < kMinDistanceY) {
       return nullptr;
     }
 
-    std::shared_ptr<Node> result(new Node(aBorder));
+    std::unique_ptr<Node> result(new Node(aBorder));
 
     return result;
   }
@@ -554,10 +554,10 @@ class Node {
   std::optional<Point> mPoint;
 
   // Node quads
-  std::shared_ptr<Node> mTopRight;
-  std::shared_ptr<Node> mTopLeft;
-  std::shared_ptr<Node> mBottomRight;
-  std::shared_ptr<Node> mBottomLeft;
+  std::unique_ptr<Node> mTopRight;
+  std::unique_ptr<Node> mTopLeft;
+  std::unique_ptr<Node> mBottomRight;
+  std::unique_ptr<Node> mBottomLeft;
 };
 
 int main(int arcg, char* argv[]) {
