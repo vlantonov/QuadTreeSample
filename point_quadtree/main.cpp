@@ -218,25 +218,25 @@ class Node {
 
     // Search children
     // TODO: Parallelization point
-    if (mTopRight && mPoint.x <= aArea.Xmax() && mPoint.y <= aArea.Ymax()) {
+    if (mPoint.x <= aArea.Xmax() && mPoint.y <= aArea.Ymax() && mTopRight) {
       // std::cout << "Search Area TopRight\n";
       auto&& pointsFoundInArea = mTopRight->findPointsInArea(aArea);
       result.splice(std::end(result), pointsFoundInArea);
     }
 
-    if (mTopLeft && mPoint.x >= aArea.Xmin() && mPoint.y <= aArea.Ymax()) {
+    if (mPoint.x >= aArea.Xmin() && mPoint.y <= aArea.Ymax() && mTopLeft) {
       // std::cout << "Search Area TopLeft\n";
       auto&& pointsFoundInArea = mTopLeft->findPointsInArea(aArea);
       result.splice(std::end(result), pointsFoundInArea);
     }
 
-    if (mBottomRight && mPoint.x <= aArea.Xmax() && mPoint.y >= aArea.Ymin()) {
+    if (mPoint.x <= aArea.Xmax() && mPoint.y >= aArea.Ymin() && mBottomRight) {
       // std::cout << "Search Area BottomRight\n";
       auto&& pointsFoundInArea = mBottomRight->findPointsInArea(aArea);
       result.splice(std::end(result), pointsFoundInArea);
     }
 
-    if (mBottomLeft && mPoint.x >= aArea.Xmin() && mPoint.y >= aArea.Ymin()) {
+    if (mPoint.x >= aArea.Xmin() && mPoint.y >= aArea.Ymin() && mBottomLeft) {
       // std::cout << "Search Area BottomLeft\n";
       auto&& pointsFoundInArea = mBottomLeft->findPointsInArea(aArea);
       result.splice(std::end(result), pointsFoundInArea);
