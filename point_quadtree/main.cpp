@@ -50,8 +50,8 @@ struct Point {
 };
 
 bool operator==(const Point& lhs, const Point& rhs) {
-  return (std::abs(lhs.x - rhs.x) < kEpsilon &&
-          std::abs(lhs.y - lhs.y) < kEpsilon);
+  return std::sqrt((lhs.x - rhs.x) * (lhs.x - rhs.x) +
+                   (lhs.y - lhs.y) * (lhs.y - lhs.y)) < kEpsilon;
 }
 
 bool operator!=(const Point& lhs, const Point& rhs) { return !(lhs == rhs); }
@@ -120,22 +120,23 @@ class Node {
       return false;
     }
 
-    const auto oldDepth = mDepth;
-
+    bool isInserted = true;
     if (aPoint.x > mPoint.x) {
       if (aPoint.y > mPoint.y) {
         std::cout << "TopRight" << '\n';
         if (mTopRight) {
-          mTopRight->insertPoint(aPoint);
+          isInserted = mTopRight->insertPoint(aPoint);
         } else {
           mTopRight = createNode(aPoint);
+          isInserted = static_cast<bool>(mTopRight);
         }
       } else {
         std::cout << "BottomRight" << '\n';
         if (mBottomRight) {
-          mBottomRight->insertPoint(aPoint);
+          isInserted = mBottomRight->insertPoint(aPoint);
         } else {
           mBottomRight = createNode(aPoint);
+          isInserted = static_cast<bool>(mBottomRight);
         }
       }
 
@@ -143,16 +144,18 @@ class Node {
       if (aPoint.y > mPoint.y) {
         std::cout << "TopLeft" << '\n';
         if (mTopLeft) {
-          mTopLeft->insertPoint(aPoint);
+          isInserted = mTopLeft->insertPoint(aPoint);
         } else {
           mTopLeft = createNode(aPoint);
+          isInserted = static_cast<bool>(mTopLeft);
         }
       } else {
         std::cout << "BottomLeft" << '\n';
         if (mBottomLeft) {
-          mBottomLeft->insertPoint(aPoint);
+          isInserted = mBottomLeft->insertPoint(aPoint);
         } else {
           mBottomLeft = createNode(aPoint);
+          isInserted = static_cast<bool>(mBottomLeft);
         }
       }
     }
@@ -161,7 +164,7 @@ class Node {
                        getDepth(mTopLeft), getDepth(mBottomLeft)}) +
              1;
 
-    return mDepth == oldDepth;
+    return isInserted;
   }
 
   bool findPoint(const Point& aPoint) {
@@ -324,11 +327,16 @@ int main(int /*argc*/, char* /*argv*/[]) {
     TimeBench bench{"Insert points in Quad Tree"};
     for (const auto& point : testPoints) {
       std::cout << "===\n";
+      if (root->getPoint() == point) {
+        insertedPoints++;
+        continue;
+      }
       const auto isInserted = root->insertPoint(point);
       if (isInserted) {
         insertedPoints++;
       } else {
         std::cout << "Failed to insert point!" << '\n';
+        exit(1);
       }
       std::cout << "===\n";
     }
