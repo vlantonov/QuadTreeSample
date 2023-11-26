@@ -160,9 +160,7 @@ class Node {
       }
     }
 
-    mDepth = std::max({getDepth(mTopRight), getDepth(mBottomRight),
-                       getDepth(mTopLeft), getDepth(mBottomLeft)}) +
-             1;
+    updateDepth();
 
     return isInserted;
   }
@@ -248,13 +246,89 @@ class Node {
   }
 
   bool deletePoint(const Point& aPoint) {
-    // std::cout << "Delete " << aPoint << '\n';
-    bool isDeleted = false;
+    std::cout << "Delete " << aPoint << '\n';
 
-    // Search children
-    // TODO: Parallelization point
+    // Check if Node point to delete is close enough
+    if (mPoint == aPoint) {
+      std::cout << "Deleted leaf\n";
 
-    return isDeleted;
+      // Current node point value is to be replaced
+      // with the one largest depth
+      const auto largestDepth =
+          std::max({getDepth(mTopRight), getDepth(mBottomRight),
+                    getDepth(mTopLeft), getDepth(mBottomLeft)});
+
+      // If it is a leaf node then invalidate
+      if (largestDepth == 0) {
+        std::cout << "Invalidate leaf node\n";
+        mDepth = 0;
+      }
+
+      return true;
+    }
+
+    // Delete in children
+    if (aPoint.x > mPoint.x) {
+      if (aPoint.y > mPoint.y) {
+        std::cout << "Delete in TopRight" << '\n';
+        if (mTopRight) {
+          const auto isDeleted = mTopRight->deletePoint(aPoint);
+          if (mTopRight->isEmpty()) {
+            mTopRight.reset();
+            std::cout << "Deleted Node TopRight" << '\n';
+          }
+          if (isDeleted) {
+            updateDepth();
+          }
+          return isDeleted;
+        }
+      } else {
+        std::cout << "Delete in BottomRight" << '\n';
+        if (mBottomRight) {
+          const auto isDeleted = mBottomRight->deletePoint(aPoint);
+          if (mBottomRight->isEmpty()) {
+            std::cout << "Deleted Node BottomRight" << '\n';
+            mBottomRight.reset();
+          }
+          if (isDeleted) {
+            updateDepth();
+          }
+          return isDeleted;
+        }
+      }
+
+    } else {
+      if (aPoint.y > mPoint.y) {
+        std::cout << "Delete in TopLeft" << '\n';
+        if (mTopLeft) {
+          const auto isDeleted = mTopLeft->deletePoint(aPoint);
+          if (mTopLeft->isEmpty()) {
+            std::cout << "Deleted Node TopLeft" << '\n';
+            mTopLeft.reset();
+          }
+          if (isDeleted) {
+            updateDepth();
+          }
+          return isDeleted;
+        }
+      } else {
+        std::cout << "Delete in BottomLeft" << '\n';
+        if (mBottomLeft) {
+          const auto isDeleted = mBottomLeft->deletePoint(aPoint);
+          if (mBottomLeft->isEmpty()) {
+            std::cout << "Deleted Node BottomLeft" << '\n';
+            mBottomLeft.reset();
+          }
+          if (isDeleted) {
+            updateDepth();
+          }
+          return isDeleted;
+        }
+      }
+    }
+
+    std::cout << "Point " << aPoint << " not deleted\n";
+    return false;
   }
 
   [[nodiscard]] Point getPoint() const { return mPoint; }
@@ -265,6 +339,8 @@ class Node {
   }
 
   int getDepth() const { return mDepth; }
+
+  [[nodiscard]] bool isEmpty() const { return mDepth == 0; }
 
  private:
   Node(const Point& aPoint) : mPoint{aPoint} {
@@ -278,11 +354,16 @@ class Node {
     return 0;
   }
 
+  void updateDepth() {
+    mDepth = std::max({getDepth(mTopRight), getDepth(mBottomRight),
+                       getDepth(mTopLeft), getDepth(mBottomLeft)}) +
+             1;
+  }
+
   // Point
   Point mPoint;
 
   // Node depth
-  // TODO: Empty when zero
   int mDepth{1};
 
   // Node quads
@@ -418,13 +499,13 @@ int main(int /*argc*/, char* /*argv*/[]) {
       // for (const auto& currentPoint : root->getAllPoints()) {
       //   std::cout << currentPoint << '\n';
       // }
-      // std::cout << "=====\n";
+      std::cout << "=====\n";
       const auto isPointDeleted = root->deletePoint(point);
       if (isPointDeleted) {
         pointsDeleted++;
       }
-      // std::cout << "Delete point: " << point << " " << isPointDeleted <<
-      // '\n'; std::cout << "=====\n";
+      std::cout << "Delete point: " << point << " " << isPointDeleted << '\n';
+      std::cout << "=====\n";
     }
   }
 
@@ -432,6 +513,8 @@ int main(int /*argc*/, char* /*argv*/[]) {
     std::cout << "Expected deleted points: " << testPoints.size()
               << "  Deleted points: " << pointsDeleted << '\n';
   }
+
+  std::cout << "Root empty: " << root->isEmpty() << '\n';
 
   std::cout << "Done.\n";
 
