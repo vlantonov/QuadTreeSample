@@ -51,7 +51,7 @@ struct Point {
 
 bool operator==(const Point& lhs, const Point& rhs) {
   return (std::abs(lhs.x - rhs.x) < kEpsilon &&
-          std::abs(lhs.y - lhs.y) < kEpsilon);
+          std::abs(lhs.y - rhs.y) < kEpsilon);
 }
 
 bool operator!=(const Point& lhs, const Point& rhs) { return !(lhs == rhs); }
