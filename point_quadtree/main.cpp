@@ -330,8 +330,37 @@ class Node {
   [[nodiscard]] Point getPoint() const { return mPoint; }
 
   [[nodiscard]] std::list<Point> getAllPoints() const {
-    // TODO: Complete
     std::list<Point> points;
+
+    if (!isEmpty()) {
+      points.push_back(mPoint);
+    }
+
+    // TODO: Parallelization point
+    if (mTopRight) {
+      std::cout << "Get points from TopRight\n";
+      auto&& pointsFound = mTopRight->getAllPoints();
+      points.splice(std::end(points), pointsFound);
+    }
+
+    if (mTopLeft) {
+      std::cout << "Get points from TopLeft\n";
+      auto&& pointsFound = mTopLeft->getAllPoints();
+      points.splice(std::end(points), pointsFound);
+    }
+
+    if (mBottomRight) {
+      std::cout << "Get points from BottomRight\n";
+      auto&& pointsFound = mBottomRight->getAllPoints();
+      points.splice(std::end(points), pointsFound);
+    }
+
+    if (mBottomLeft) {
+      std::cout << "Get points from BottomLeft\n";
+      auto&& pointsFound = mBottomLeft->getAllPoints();
+      points.splice(std::end(points), pointsFound);
+    }
+
     return points;
   }
 
@@ -492,11 +521,11 @@ int main(int /*argc*/, char* /*argv*/[]) {
   {
     TimeBench bench{"Delete points in Quad Tree"};
     for (const auto& point : testPoints) {
-      // std::cout << "=====\n";
-      // std::cout << "Points in root:\n";
-      // for (const auto& currentPoint : root->getAllPoints()) {
-      //   std::cout << currentPoint << '\n';
-      // }
+      std::cout << "=====\n";
+      std::cout << "Points in root:\n";
+      for (const auto& currentPoint : root->getAllPoints()) {
+        std::cout << currentPoint << '\n';
+      }
       std::cout << "=====\n";
       const auto isPointDeleted = root->deletePoint(point);
       if (isPointDeleted) {
