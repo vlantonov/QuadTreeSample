@@ -422,22 +422,22 @@ int main(int /*argc*/, char* /*argv*/[]) {
   }
 
   // Root node
-  auto root = Node::createNode(testPoints.at(kPointsNumber / 2));
+  auto root = Node::createNode(testPoints.at(0));
   if (!root) {
     std::cout << "Failed to create root!\n";
     return EXIT_FAILURE;
   }
 
   // Insert points in Quad Tree
-  int insertedPoints = 0;
+  int insertedPoints = 1;
   {
     TimeBench bench{"Insert points in Quad Tree"};
-    for (const auto& point : testPoints) {
+
+    // First point already inserted
+    for (auto startIt = std::next(std::begin(testPoints));
+         startIt != std::end(testPoints); ++startIt) {
+      const auto point = *startIt;
       std::cout << "===\n";
-      if (root->getPoint() == point) {
-        insertedPoints++;
-        continue;
-      }
       const auto isInserted = root->insertPoint(point);
       if (isInserted) {
         insertedPoints++;
