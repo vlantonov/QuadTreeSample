@@ -250,19 +250,15 @@ class Node {
 
     // Check if Node point to delete is close enough
     if (mPoint == aPoint) {
-      std::cout << "Deleted leaf\n";
-
-      // Current node point value is to be replaced
-      // with the one largest depth
+      // Current node point value is invalid - update depth
       const auto largestDepth =
           std::max({getDepth(mTopRight), getDepth(mBottomRight),
                     getDepth(mTopLeft), getDepth(mBottomLeft)});
+      mDepth = largestDepth;
 
-      // If it is a leaf node then invalidate
-      if (largestDepth == 0) {
-        std::cout << "Invalidate leaf node\n";
-        mDepth = 0;
-      }
+      std::cout << (mDepth ? "Deleted current node"
+                           : "Current node invalidated")
+                << '\n';
 
       return true;
     }
@@ -335,7 +331,8 @@ class Node {
 
   [[nodiscard]] std::list<Point> getAllPoints() const {
     // TODO: Complete
-    return {};
+    std::list<Point> points;
+    return points;
   }
 
   int getDepth() const { return mDepth; }
@@ -415,6 +412,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
       const auto isInserted = root->insertPoint(point);
       if (isInserted) {
         insertedPoints++;
+        std::cout << "Root depth after insert: " << root->getDepth() << '\n';
       } else {
         std::cout << "Failed to insert point!" << '\n';
       }
@@ -504,7 +502,8 @@ int main(int /*argc*/, char* /*argv*/[]) {
       if (isPointDeleted) {
         pointsDeleted++;
       }
-      std::cout << "Delete point: " << point << " " << isPointDeleted << '\n';
+      std::cout << "Delete point: " << point << " " << isPointDeleted
+                << "  root depth: " << root->getDepth() << '\n';
       std::cout << "=====\n";
     }
   }
