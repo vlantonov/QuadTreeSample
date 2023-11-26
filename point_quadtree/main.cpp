@@ -260,6 +260,55 @@ class Node {
                            : "Current node invalidated")
                 << '\n';
 
+      // TODO: Proceed children
+      if (mTopRight && !mBottomRight && !mTopLeft && !mBottomLeft) {
+        std::cout << "Replace with TopRight node";
+        mBottomRight = std::move(mTopRight->mBottomRight);
+        mTopLeft = std::move(mTopRight->mTopLeft);
+        mBottomLeft = std::move(mTopRight->mBottomLeft);
+
+        mPoint = mTopRight->mPoint;
+        mDepth = mTopRight->mDepth;
+        mTopRight = std::move(mTopRight->mTopRight);
+        return true;
+      }
+
+      if (!mTopRight && mBottomRight && !mTopLeft && !mBottomLeft) {
+        std::cout << "Replace with BottomRight node";
+        mTopRight = std::move(mBottomRight->mTopRight);
+        mTopLeft = std::move(mBottomRight->mTopLeft);
+        mBottomLeft = std::move(mBottomRight->mBottomLeft);
+
+        mPoint = mBottomRight->mPoint;
+        mDepth = mBottomRight->mDepth;
+        mBottomRight = std::move(mBottomRight->mBottomRight);
+        return true;
+      }
+
+      if (!mTopRight && !mBottomRight && mTopLeft && !mBottomLeft) {
+        std::cout << "Replace with TopLeft node";
+        mTopRight = std::move(mTopLeft->mTopRight);
+        mBottomRight = std::move(mTopLeft->mBottomRight);
+        mBottomLeft = std::move(mTopLeft->mBottomLeft);
+
+        mPoint = mTopLeft->mPoint;
+        mDepth = mTopLeft->mDepth;
+        mTopLeft = std::move(mTopLeft->mTopLeft);
+        return true;
+      }
+
+      if (!mTopRight && !mBottomRight && !mTopLeft && mBottomLeft) {
+        std::cout << "Replace with TopLeft node";
+        mTopRight = std::move(mBottomLeft->mTopRight);
+        mBottomRight = std::move(mBottomLeft->mBottomRight);
+        mTopLeft = std::move(mBottomLeft->mTopLeft);
+
+        mPoint = mBottomLeft->mPoint;
+        mDepth = mBottomLeft->mDepth;
+        mBottomLeft = std::move(mBottomLeft->mBottomLeft);
+        return true;
+      }
+
       return true;
     }
 
