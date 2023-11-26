@@ -250,6 +250,7 @@ class Node {
 
     // Check if Node point to delete is close enough
     if (mPoint == aPoint) {
+      mIsdeleted = true;
       // Current node point value is invalid - update depth
       const auto largestDepth =
           std::max({getDepth(mTopRight), getDepth(mBottomRight),
@@ -260,9 +261,9 @@ class Node {
                            : "Current node invalidated")
                 << '\n';
 
-      // TODO: Proceed children
       if (mTopRight && !mBottomRight && !mTopLeft && !mBottomLeft) {
-        std::cout << "Replace with TopRight node";
+        std::cout << "Replace with TopRight node\n";
+
         mBottomRight = std::move(mTopRight->mBottomRight);
         mTopLeft = std::move(mTopRight->mTopLeft);
         mBottomLeft = std::move(mTopRight->mBottomLeft);
@@ -274,7 +275,8 @@ class Node {
       }
 
       if (!mTopRight && mBottomRight && !mTopLeft && !mBottomLeft) {
-        std::cout << "Replace with BottomRight node";
+        std::cout << "Replace with BottomRight node\n";
+
         mTopRight = std::move(mBottomRight->mTopRight);
         mTopLeft = std::move(mBottomRight->mTopLeft);
         mBottomLeft = std::move(mBottomRight->mBottomLeft);
@@ -286,7 +288,7 @@ class Node {
       }
 
       if (!mTopRight && !mBottomRight && mTopLeft && !mBottomLeft) {
-        std::cout << "Replace with TopLeft node";
+        std::cout << "Replace with TopLeft node\n";
         mTopRight = std::move(mTopLeft->mTopRight);
         mBottomRight = std::move(mTopLeft->mBottomRight);
         mBottomLeft = std::move(mTopLeft->mBottomLeft);
@@ -298,7 +300,7 @@ class Node {
       }
 
       if (!mTopRight && !mBottomRight && !mTopLeft && mBottomLeft) {
-        std::cout << "Replace with TopLeft node";
+        std::cout << "Replace with BottomLeft node\n";
         mTopRight = std::move(mBottomLeft->mTopRight);
         mBottomRight = std::move(mBottomLeft->mBottomRight);
         mTopLeft = std::move(mBottomLeft->mTopLeft);
@@ -308,6 +310,8 @@ class Node {
         mBottomLeft = std::move(mBottomLeft->mBottomLeft);
         return true;
       }
+
+      // TODO: Proceed children of deleted node
 
       return true;
     }
@@ -381,7 +385,7 @@ class Node {
   [[nodiscard]] std::list<Point> getAllPoints() const {
     std::list<Point> points;
 
-    if (!isEmpty()) {
+    if (!mIsdeleted) {
       points.push_back(mPoint);
     }
 
@@ -431,8 +435,10 @@ class Node {
 
   void updateDepth() {
     mDepth = std::max({getDepth(mTopRight), getDepth(mBottomRight),
-                       getDepth(mTopLeft), getDepth(mBottomLeft)}) +
-             1;
+                       getDepth(mTopLeft), getDepth(mBottomLeft)});
+    if (!mIsdeleted) {
+      mDepth++;
+    }
   }
 
   // Point
@@ -440,6 +446,9 @@ class Node {
 
   // Node depth
   int mDepth{1};
+
+  // TODO: Refactor using mDepth
+  bool mIsdeleted{false};
 
   // Node quads
   std::unique_ptr<Node> mTopRight;
@@ -592,6 +601,13 @@ int main(int /*argc*/, char* /*argv*/[]) {
   }
 
   std::cout << "Root empty: " << root->isEmpty() << '\n';
+
+  std::cout << "=====\n";
+  std::cout << "Points in root:\n";
+  for (const auto& currentPoint : root->getAllPoints()) {
+    std::cout << currentPoint << '\n';
+  }
+  std::cout << "=====\n";
 
   std::cout << "Done.\n";
 
