@@ -417,7 +417,7 @@ class Node {
     return points;
   }
 
-  int getDepth() const { return mDepth; }
+  [[nodiscard]] int getDepth() const { return mDepth; }
 
   [[nodiscard]] bool isEmpty() const { return mDepth == 0; }
 
