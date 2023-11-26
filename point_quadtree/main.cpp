@@ -50,8 +50,8 @@ struct Point {
 };
 
 bool operator==(const Point& lhs, const Point& rhs) {
-  return std::sqrt((lhs.x - rhs.x) * (lhs.x - rhs.x) +
-                   (lhs.y - lhs.y) * (lhs.y - lhs.y)) < kEpsilon;
+  return (std::abs(lhs.x - rhs.x) < kEpsilon &&
+          std::abs(lhs.y - rhs.y) < kEpsilon);
 }
 
 bool operator!=(const Point& lhs, const Point& rhs) { return !(lhs == rhs); }
@@ -336,7 +336,6 @@ int main(int /*argc*/, char* /*argv*/[]) {
         insertedPoints++;
       } else {
         std::cout << "Failed to insert point!" << '\n';
-        exit(1);
       }
       std::cout << "===\n";
     }
