@@ -22,7 +22,7 @@ constexpr float kYmax = 1.0;
 constexpr float kMinDistanceX = 1e-5;
 constexpr float kMinDistanceY = 1e-5;
 
-constexpr int kPointsNumber = 10;  // 0000;
+constexpr int kPointsNumber = 100000;
 
 class TimeBench {
  public:
@@ -112,18 +112,18 @@ class Node {
   }
 
   bool insertPoint(const Point& aPoint) {
-    std::cout << "Insert " << aPoint << '\n';
+    // std::cout << "Insert " << aPoint << '\n';
 
     // Check if point is previously inserted
     if (aPoint == mPoint) {
-      std::cout << "Point already exists!\n";
+      // std::cout << "Point already exists!\n";
       return false;
     }
 
     bool isInserted = true;
     if (aPoint.x > mPoint.x) {
       if (aPoint.y > mPoint.y) {
-        std::cout << "TopRight" << '\n';
+        // std::cout << "TopRight" << '\n';
         if (mTopRight) {
           isInserted = mTopRight->insertPoint(aPoint);
         } else {
@@ -131,7 +131,7 @@ class Node {
           isInserted = static_cast<bool>(mTopRight);
         }
       } else {
-        std::cout << "BottomRight" << '\n';
+        // std::cout << "BottomRight" << '\n';
         if (mBottomRight) {
           isInserted = mBottomRight->insertPoint(aPoint);
         } else {
@@ -142,7 +142,7 @@ class Node {
 
     } else {
       if (aPoint.y > mPoint.y) {
-        std::cout << "TopLeft" << '\n';
+        // std::cout << "TopLeft" << '\n';
         if (mTopLeft) {
           isInserted = mTopLeft->insertPoint(aPoint);
         } else {
@@ -150,7 +150,7 @@ class Node {
           isInserted = static_cast<bool>(mTopLeft);
         }
       } else {
-        std::cout << "BottomLeft" << '\n';
+        // std::cout << "BottomLeft" << '\n';
         if (mBottomLeft) {
           isInserted = mBottomLeft->insertPoint(aPoint);
         } else {
@@ -166,23 +166,23 @@ class Node {
   }
 
   bool findPoint(const Point& aPoint) {
-    std::cout << "Find " << aPoint << '\n';
+    // std::cout << "Find " << aPoint << '\n';
 
     // Check if Node point found is close enough
     if (mPoint == aPoint) {
-      std::cout << "Found\n";
+      // std::cout << "Found\n";
       return true;
     }
 
     // Search children
     if (aPoint.x > mPoint.x) {
       if (aPoint.y > mPoint.y) {
-        std::cout << "Find TopRight" << '\n';
+        // std::cout << "Find TopRight" << '\n';
         if (mTopRight) {
           return mTopRight->findPoint(aPoint);
         }
       } else {
-        std::cout << "Find BottomRight" << '\n';
+        // std::cout << "Find BottomRight" << '\n';
         if (mBottomRight) {
           return mBottomRight->findPoint(aPoint);
         }
@@ -190,25 +190,25 @@ class Node {
 
     } else {
       if (aPoint.y > mPoint.y) {
-        std::cout << "Find TopLeft" << '\n';
+        // std::cout << "Find TopLeft" << '\n';
         if (mTopLeft) {
           return mTopLeft->findPoint(aPoint);
         }
       } else {
-        std::cout << "Find BottomLeft" << '\n';
+        // std::cout << "Find BottomLeft" << '\n';
         if (mBottomLeft) {
           return mBottomLeft->findPoint(aPoint);
         }
       }
     }
 
-    std::cout << "Not Found\n";
+    // std::cout << "Not Found\n";
     return false;
   }
 
   [[nodiscard]] std::list<Point> findPointsInArea(
       const Rectangle& aArea) const {
-    std::cout << "Find in " << aArea << '\n';
+    // std::cout << "Find in " << aArea << '\n';
 
     std::list<Point> result;
 
@@ -219,25 +219,25 @@ class Node {
     // Search children
     // TODO: Parallelization point
     if (mTopRight && mPoint.x <= aArea.Xmax() && mPoint.y <= aArea.Ymax()) {
-      std::cout << "Search Area TopRight\n";
+      // std::cout << "Search Area TopRight\n";
       auto&& pointsFoundInArea = mTopRight->findPointsInArea(aArea);
       result.splice(std::end(result), pointsFoundInArea);
     }
 
     if (mTopLeft && mPoint.x >= aArea.Xmin() && mPoint.y <= aArea.Ymax()) {
-      std::cout << "Search Area TopLeft\n";
+      // std::cout << "Search Area TopLeft\n";
       auto&& pointsFoundInArea = mTopLeft->findPointsInArea(aArea);
       result.splice(std::end(result), pointsFoundInArea);
     }
 
     if (mBottomRight && mPoint.x <= aArea.Xmax() && mPoint.y >= aArea.Ymin()) {
-      std::cout << "Search Area BottomRight\n";
+      // std::cout << "Search Area BottomRight\n";
       auto&& pointsFoundInArea = mBottomRight->findPointsInArea(aArea);
       result.splice(std::end(result), pointsFoundInArea);
     }
 
     if (mBottomLeft && mPoint.x >= aArea.Xmin() && mPoint.y >= aArea.Ymin()) {
-      std::cout << "Search Area BottomLeft\n";
+      // std::cout << "Search Area BottomLeft\n";
       auto&& pointsFoundInArea = mBottomLeft->findPointsInArea(aArea);
       result.splice(std::end(result), pointsFoundInArea);
     }
@@ -246,7 +246,7 @@ class Node {
   }
 
   bool deletePoint(const Point& aPoint) {
-    std::cout << "Delete " << aPoint << '\n';
+    // std::cout << "Delete " << aPoint << '\n';
 
     // Check if Node point to delete is close enough
     if (mPoint == aPoint) {
@@ -257,12 +257,12 @@ class Node {
                     getDepth(mTopLeft), getDepth(mBottomLeft)});
       mDepth = largestDepth;
 
-      std::cout << (mDepth ? "Deleted current node"
-                           : "Current node invalidated")
-                << '\n';
+      // std::cout << (mDepth ? "Deleted current node"
+      //                      : "Current node invalidated")
+      //           << '\n';
 
       if (mTopRight && !mBottomRight && !mTopLeft && !mBottomLeft) {
-        std::cout << "Replace with TopRight node\n";
+        // std::cout << "Replace with TopRight node\n";
 
         mBottomRight = std::move(mTopRight->mBottomRight);
         mTopLeft = std::move(mTopRight->mTopLeft);
@@ -275,7 +275,7 @@ class Node {
       }
 
       if (!mTopRight && mBottomRight && !mTopLeft && !mBottomLeft) {
-        std::cout << "Replace with BottomRight node\n";
+        // std::cout << "Replace with BottomRight node\n";
 
         mTopRight = std::move(mBottomRight->mTopRight);
         mTopLeft = std::move(mBottomRight->mTopLeft);
@@ -288,7 +288,7 @@ class Node {
       }
 
       if (!mTopRight && !mBottomRight && mTopLeft && !mBottomLeft) {
-        std::cout << "Replace with TopLeft node\n";
+        // std::cout << "Replace with TopLeft node\n";
         mTopRight = std::move(mTopLeft->mTopRight);
         mBottomRight = std::move(mTopLeft->mBottomRight);
         mBottomLeft = std::move(mTopLeft->mBottomLeft);
@@ -300,7 +300,7 @@ class Node {
       }
 
       if (!mTopRight && !mBottomRight && !mTopLeft && mBottomLeft) {
-        std::cout << "Replace with BottomLeft node\n";
+        // std::cout << "Replace with BottomLeft node\n";
         mTopRight = std::move(mBottomLeft->mTopRight);
         mBottomRight = std::move(mBottomLeft->mBottomRight);
         mTopLeft = std::move(mBottomLeft->mTopLeft);
@@ -319,12 +319,12 @@ class Node {
     // Delete in children
     if (aPoint.x > mPoint.x) {
       if (aPoint.y > mPoint.y) {
-        std::cout << "Delete in TopRight" << '\n';
+        // std::cout << "Delete in TopRight" << '\n';
         if (mTopRight) {
           const auto isDeleted = mTopRight->deletePoint(aPoint);
           if (mTopRight->isEmpty()) {
             mTopRight.reset();
-            std::cout << "Deleted Node TopRight" << '\n';
+            // std::cout << "Deleted Node TopRight" << '\n';
           }
           if (isDeleted) {
             updateDepth();
@@ -332,11 +332,11 @@ class Node {
           return isDeleted;
         }
       } else {
-        std::cout << "Delete in BottomRight" << '\n';
+        // std::cout << "Delete in BottomRight" << '\n';
         if (mBottomRight) {
           const auto isDeleted = mBottomRight->deletePoint(aPoint);
           if (mBottomRight->isEmpty()) {
-            std::cout << "Deleted Node BottomRight" << '\n';
+            // std::cout << "Deleted Node BottomRight" << '\n';
             mBottomRight.reset();
           }
           if (isDeleted) {
@@ -348,11 +348,11 @@ class Node {
 
     } else {
       if (aPoint.y > mPoint.y) {
-        std::cout << "Delete in TopLeft" << '\n';
+        // std::cout << "Delete in TopLeft" << '\n';
         if (mTopLeft) {
           const auto isDeleted = mTopLeft->deletePoint(aPoint);
           if (mTopLeft->isEmpty()) {
-            std::cout << "Deleted Node TopLeft" << '\n';
+            // std::cout << "Deleted Node TopLeft" << '\n';
             mTopLeft.reset();
           }
           if (isDeleted) {
@@ -361,11 +361,11 @@ class Node {
           return isDeleted;
         }
       } else {
-        std::cout << "Delete in BottomLeft" << '\n';
+        // std::cout << "Delete in BottomLeft" << '\n';
         if (mBottomLeft) {
           const auto isDeleted = mBottomLeft->deletePoint(aPoint);
           if (mBottomLeft->isEmpty()) {
-            std::cout << "Deleted Node BottomLeft" << '\n';
+            // std::cout << "Deleted Node BottomLeft" << '\n';
             mBottomLeft.reset();
           }
           if (isDeleted) {
@@ -376,7 +376,7 @@ class Node {
       }
     }
 
-    std::cout << "Point " << aPoint << " not deleted\n";
+    // std::cout << "Point " << aPoint << " not deleted\n";
     return false;
   }
 
@@ -391,25 +391,25 @@ class Node {
 
     // TODO: Parallelization point
     if (mTopRight) {
-      std::cout << "Get points from TopRight\n";
+      // std::cout << "Get points from TopRight\n";
       auto&& pointsFound = mTopRight->getAllPoints();
       points.splice(std::end(points), pointsFound);
     }
 
     if (mTopLeft) {
-      std::cout << "Get points from TopLeft\n";
+      // std::cout << "Get points from TopLeft\n";
       auto&& pointsFound = mTopLeft->getAllPoints();
       points.splice(std::end(points), pointsFound);
     }
 
     if (mBottomRight) {
-      std::cout << "Get points from BottomRight\n";
+      // std::cout << "Get points from BottomRight\n";
       auto&& pointsFound = mBottomRight->getAllPoints();
       points.splice(std::end(points), pointsFound);
     }
 
     if (mBottomLeft) {
-      std::cout << "Get points from BottomLeft\n";
+      // std::cout << "Get points from BottomLeft\n";
       auto&& pointsFound = mBottomLeft->getAllPoints();
       points.splice(std::end(points), pointsFound);
     }
@@ -423,7 +423,7 @@ class Node {
 
  private:
   Node(const Point& aPoint) : mPoint{aPoint} {
-    std::cout << "Node point " << mPoint << '\n';
+    // std::cout << "Node point " << mPoint << '\n';
   }
 
   static int getDepth(std::unique_ptr<Node>& aNode) {
@@ -495,15 +495,15 @@ int main(int /*argc*/, char* /*argv*/[]) {
     for (auto startIt = std::next(std::begin(testPoints));
          startIt != std::end(testPoints); ++startIt) {
       const auto point = *startIt;
-      std::cout << "===\n";
+      // std::cout << "===\n";
       const auto isInserted = root->insertPoint(point);
       if (isInserted) {
         insertedPoints++;
-        std::cout << "Root depth after insert: " << root->getDepth() << '\n';
+        // std::cout << "Root depth after insert: " << root->getDepth() << '\n';
       } else {
-        std::cout << "Failed to insert point!" << '\n';
+        // std::cout << "Failed to insert point!" << '\n';
       }
-      std::cout << "===\n";
+      // std::cout << "===\n";
     }
   }
   if (insertedPoints != testPoints.size()) {
@@ -533,13 +533,13 @@ int main(int /*argc*/, char* /*argv*/[]) {
   {
     TimeBench bench{"Find points in Quad Tree"};
     for (const auto& point : testPoints) {
-      std::cout << "=====\n";
+      // std::cout << "=====\n";
       const auto isPointFound = root->findPoint(point);
-      std::cout << "Find point: " << isPointFound << '\n';
+      // std::cout << "Find point: " << isPointFound << '\n';
       if (isPointFound) {
         pointsFound++;
       }
-      std::cout << "=====\n";
+      // std::cout << "=====\n";
     }
   }
   if (pointsFound != testPoints.size()) {
@@ -548,8 +548,8 @@ int main(int /*argc*/, char* /*argv*/[]) {
   }
 
   // Missing point?
-  const auto pointFound = root->findPoint(Point{0.1, 0.1});
-  std::cout << "Find point: " << pointFound << '\n';
+  // const auto pointFound = root->findPoint(Point{0.1, 0.1});
+  // std::cout << "Find point: " << pointFound << '\n';
 
   // Search points in area
   const Rectangle searchArea{-1.0, 0.0, -1.0, 0.0};
@@ -579,19 +579,19 @@ int main(int /*argc*/, char* /*argv*/[]) {
   {
     TimeBench bench{"Delete points in Quad Tree"};
     for (const auto& point : testPoints) {
-      std::cout << "=====\n";
-      std::cout << "Points in root:\n";
-      for (const auto& currentPoint : root->getAllPoints()) {
-        std::cout << currentPoint << '\n';
-      }
-      std::cout << "=====\n";
+      // std::cout << "=====\n";
+      // std::cout << "Points in root:\n";
+      // for (const auto& currentPoint : root->getAllPoints()) {
+      //   std::cout << currentPoint << '\n';
+      // }
+      // std::cout << "=====\n";
       const auto isPointDeleted = root->deletePoint(point);
       if (isPointDeleted) {
         pointsDeleted++;
       }
-      std::cout << "Delete point: " << point << " " << isPointDeleted
-                << "  root depth: " << root->getDepth() << '\n';
-      std::cout << "=====\n";
+      // std::cout << "Delete point: " << point << " " << isPointDeleted
+      //           << "  root depth: " << root->getDepth() << '\n';
+      // std::cout << "=====\n";
     }
   }
 
@@ -600,14 +600,14 @@ int main(int /*argc*/, char* /*argv*/[]) {
               << "  Deleted points: " << pointsDeleted << '\n';
   }
 
-  std::cout << "Root empty: " << root->isEmpty() << '\n';
+  // std::cout << "Root empty: " << root->isEmpty() << '\n';
 
-  std::cout << "=====\n";
-  std::cout << "Points in root:\n";
-  for (const auto& currentPoint : root->getAllPoints()) {
-    std::cout << currentPoint << '\n';
-  }
-  std::cout << "=====\n";
+  // std::cout << "=====\n";
+  // std::cout << "Points in root:\n";
+  // for (const auto& currentPoint : root->getAllPoints()) {
+  //   std::cout << currentPoint << '\n';
+  // }
+  // std::cout << "=====\n";
 
   std::cout << "Done.\n";
 
