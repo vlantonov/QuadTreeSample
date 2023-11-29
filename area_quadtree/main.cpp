@@ -306,94 +306,44 @@ class Node {
     const auto overlap = calculateOverlap(mBorder, aArea);
 
     std::list<Point> result;
-    switch (overlap) {
-      case Overlap::NO:
-        // std::cout << "No overlap between " << mBorder << " and " << aArea <<
-        // '\n';
-        return {};
-      case Overlap::YES:
-        // std::cout << "Full overlap between " << mBorder << " and " << aArea
-        // << '\n'; Leaf node
-        if (mPoint) {
-          // std::cout << "Point found in area\n";
-          return {*mPoint};
-        }
-
-        // TODO: Parallelization point
-        if (mTopRight) {
-          // std::cout << "Search area TopRight\n";
-          auto&& pointsFoundInArea = mTopRight->findPointsInArea(aArea);
-          result.splice(std::end(result), std::move(pointsFoundInArea));
-        }
-
-        if (mTopLeft) {
-          // std::cout << "Search area TopLeft\n";
-          auto&& pointsFoundInArea = mTopLeft->findPointsInArea(aArea);
-          result.splice(std::end(result), std::move(pointsFoundInArea));
-        }
-
-        if (mBottomRight) {
-          // std::cout << "Search area BottomRight\n";
-          auto&& pointsFoundInArea = mBottomRight->findPointsInArea(aArea);
-          result.splice(std::end(result), std::move(pointsFoundInArea));
-        }
-
-        if (mBottomLeft) {
-          // std::cout << "Search area BottomLeft\n";
-          auto&& pointsFoundInArea = mBottomLeft->findPointsInArea(aArea);
-          result.splice(std::end(result), std::move(pointsFoundInArea));
-        }
-        return result;
-
-      case Overlap::PARTIAL:
-        // TODO: Parallelization point
-        // std::cout << "Partial overlap between " << mBorder << " and " <<
-        // aArea << '\n';
-        if (mTopRight) {
-          // std::cout << "Search area TopRight\n";
-          const auto pointsFoundInArea = mTopRight->findPointsInArea(aArea);
-          std::copy_if(std::cbegin(pointsFoundInArea),
-                       std::cend(pointsFoundInArea), std::back_inserter(result),
-                       [&aArea](const auto& aPoint) {
-                         return aArea.isPointInside(aPoint);
-                       });
-        }
-
-        if (mTopLeft) {
-          // std::cout << "Search area TopLeft\n";
-          const auto pointsFoundInArea = mTopLeft->findPointsInArea(aArea);
-          std::copy_if(std::cbegin(pointsFoundInArea),
-                       std::cend(pointsFoundInArea), std::back_inserter(result),
-                       [&aArea](const auto& aPoint) {
-                         return aArea.isPointInside(aPoint);
-                       });
-        }
-
-        if (mBottomRight) {
-          // std::cout << "Search area BottomRight\n";
-          const auto pointsFoundInArea = mBottomRight->findPointsInArea(aArea);
-          std::copy_if(std::cbegin(pointsFoundInArea),
-                       std::cend(pointsFoundInArea), std::back_inserter(result),
-                       [&aArea](const auto& aPoint) {
-                         return aArea.isPointInside(aPoint);
-                       });
-        }
-
-        if (mBottomLeft) {
-          // std::cout << "Search area BottomLeft\n";
-          const auto pointsFoundInArea = mBottomLeft->findPointsInArea(aArea);
-          std::copy_if(std::cbegin(pointsFoundInArea),
-                       std::cend(pointsFoundInArea), std::back_inserter(result),
-                       [&aArea](const auto& aPoint) {
-                         return aArea.isPointInside(aPoint);
-                       });
-        }
-        return result;
+    if (overlap == Overlap::NO) {
+      // std::cout << "No overlap between " << mBorder << " and " << aArea <<
+      // '\n';
+      return {};
     }
 
-    // std::cout << "Unhandled overlap value: " << static_cast<int>(overlap) <<
-    // "\n";
-    return {};
+    // std::cout << "Overlap between " << mBorder << " and " << aArea
+    // << '\n'; Leaf node
+    if (mPoint) {
+      // std::cout << "Point found in area\n";
+      return {*mPoint};
+    }
+
+    // TODO: Parallelization point
+    if (mTopRight) {
+      // std::cout << "Search area TopRight\n";
+      auto&& pointsFoundInArea = mTopRight->findPointsInArea(aArea);
+      result.splice(std::end(result), std::move(pointsFoundInArea));
+    }
+
+    if (mTopLeft) {
+      // std::cout << "Search area TopLeft\n";
+      auto&& pointsFoundInArea = mTopLeft->findPointsInArea(aArea);
+      result.splice(std::end(result), std::move(pointsFoundInArea));
+    }
+
+    if (mBottomRight) {
+      // std::cout << "Search area BottomRight\n";
+      auto&& pointsFoundInArea = mBottomRight->findPointsInArea(aArea);
+      result.splice(std::end(result), std::move(pointsFoundInArea));
+    }
+
+    if (mBottomLeft) {
+      // std::cout << "Search area BottomLeft\n";
+      auto&& pointsFoundInArea = mBottomLeft->findPointsInArea(aArea);
+      result.splice(std::end(result), std::move(pointsFoundInArea));
+    }
+    return result;
   }
 
   bool deletePoint(const Point& aPoint) {
